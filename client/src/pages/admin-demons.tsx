@@ -121,7 +121,7 @@ export default function AdminDemons() {
   }, [allDemons, selectedListType]);
 
   const sensors = useSensors(
-    useSensor(PointerSensor, { distance: 8 }),
+    useSensor(PointerSensor, { activationDistance: 8 }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })

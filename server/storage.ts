@@ -111,7 +111,20 @@ export class DatabaseStorage implements IStorage {
       return Math.round(points);
     };
 
-    // Update each demon's position and recalculate points
+    // STEP 1: Assign temporary unique negative positions to all demons being reordered
+    // This avoids unique constraint violations during the update process
+    for (let i = 0; i < demonOrder.length; i++) {
+      await db
+        .update(demons)
+        .set({
+          position: -(i + 1), // Temporary negative position: -1, -2, -3, etc.
+          updatedAt: new Date(),
+        })
+        .where(eq(demons.id, demonOrder[i].id));
+    }
+
+    // STEP 2: Now assign the final correct positions and recalculate points
+    // Since all positions are now negative/unique, no conflicts can occur
     for (const { id, position } of demonOrder) {
       const points = calculatePoints(position);
       await db
@@ -189,8 +202,7 @@ export class DatabaseStorage implements IStorage {
       })
       .from(records)
       .leftJoin(users, eq(records.userId, users.id))
-      .where(eq(records.status, "approved"))
-      .andWhere(eq(records.demonId, demonId))
+      .where(eq(records.status, "approved") && eq(records.demonId, demonId))
       .orderBy(desc(records.submittedAt));
   }
 
