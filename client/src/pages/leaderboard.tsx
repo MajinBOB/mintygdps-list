@@ -1,66 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
-import { useAuth } from "@/hooks/useAuth";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { Navbar } from "@/components/Navbar";
 import { LeaderboardTable } from "@/components/LeaderboardTable";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { LogOut, LayoutDashboard } from "lucide-react";
-import { Link } from "wouter";
 
 export default function Leaderboard() {
-  const { isAdmin } = useAuth();
-
   const { data: leaderboard, isLoading } = useQuery<any[]>({
     queryKey: ["/api/leaderboard"],
   });
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto px-6 py-4 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent" />
-            <span className="font-display font-bold text-xl">GD Demonlist</span>
-          </div>
-          
-          <nav className="hidden md:flex items-center gap-6">
-            <Link href="/demonlist">
-              <a className="text-sm font-medium hover:text-primary transition-colors" data-testid="link-demonlist">
-                Demonlist
-              </a>
-            </Link>
-            <Link href="/leaderboard">
-              <a className="text-sm font-medium hover:text-primary transition-colors" data-testid="link-leaderboard">
-                Leaderboard
-              </a>
-            </Link>
-            <Link href="/submit">
-              <a className="text-sm font-medium hover:text-primary transition-colors" data-testid="link-submit">
-                Submit Record
-              </a>
-            </Link>
-          </nav>
-          
-          <div className="flex items-center gap-2">
-            {isAdmin && (
-              <Button variant="ghost" size="sm" asChild data-testid="button-admin-panel">
-                <Link href="/admin/dashboard">
-                  <LayoutDashboard className="h-4 w-4 mr-2" />
-                  Admin
-                </Link>
-              </Button>
-            )}
-            <ThemeToggle />
-            <Button variant="ghost" size="sm" asChild data-testid="button-logout">
-              <a href="/api/logout">
-                <LogOut className="h-4 w-4 mr-2" />
-                Logout
-              </a>
-            </Button>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       {/* Main Content */}
       <main className="flex-1 py-12">

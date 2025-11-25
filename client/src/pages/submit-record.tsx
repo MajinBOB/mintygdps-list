@@ -2,14 +2,14 @@ import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { isUnauthorizedError } from "@/lib/authUtils";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, LayoutDashboard, ArrowLeft, Send } from "lucide-react";
+import { ArrowLeft, Send } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,7 +19,7 @@ import type { Demon } from "@shared/schema";
 import type { z } from "zod";
 
 export default function SubmitRecord() {
-  const { isAdmin } = useAuth();
+  const { isAuthenticated } = useAuth();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
 
@@ -45,7 +45,7 @@ export default function SubmitRecord() {
         description: "Your submission is pending review by our admin team.",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/records"] });
-      setLocation("/demonlist");
+      setLocation("/list?type=demonlist");
     },
     onError: (error: Error) => {
       if (isUnauthorizedError(error)) {
@@ -69,58 +69,14 @@ export default function SubmitRecord() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto px-6 py-4 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent" />
-            <span className="font-display font-bold text-xl">GD Demonlist</span>
-          </div>
-          
-          <nav className="hidden md:flex items-center gap-6">
-            <Link href="/demonlist">
-              <a className="text-sm font-medium hover:text-primary transition-colors" data-testid="link-demonlist">
-                Demonlist
-              </a>
-            </Link>
-            <Link href="/leaderboard">
-              <a className="text-sm font-medium hover:text-primary transition-colors" data-testid="link-leaderboard">
-                Leaderboard
-              </a>
-            </Link>
-            <Link href="/submit">
-              <a className="text-sm font-medium hover:text-primary transition-colors" data-testid="link-submit">
-                Submit Record
-              </a>
-            </Link>
-          </nav>
-          
-          <div className="flex items-center gap-2">
-            {isAdmin && (
-              <Button variant="ghost" size="sm" asChild data-testid="button-admin-panel">
-                <Link href="/admin/dashboard">
-                  <LayoutDashboard className="h-4 w-4 mr-2" />
-                  Admin
-                </Link>
-              </Button>
-            )}
-            <ThemeToggle />
-            <Button variant="ghost" size="sm" asChild data-testid="button-logout">
-              <a href="/api/logout">
-                <LogOut className="h-4 w-4 mr-2" />
-                Logout
-              </a>
-            </Button>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       {/* Main Content */}
       <main className="flex-1 py-12">
         <div className="container mx-auto px-6">
           <div className="max-w-2xl mx-auto space-y-8">
             <Button variant="ghost" asChild data-testid="button-back">
-              <Link href="/demonlist">
+              <Link href="/list?type=demonlist">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Demonlist
               </Link>

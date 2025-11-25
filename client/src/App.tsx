@@ -11,6 +11,7 @@ import Landing from "@/pages/landing";
 import Home from "@/pages/home";
 import Profile from "@/pages/profile";
 import Settings from "@/pages/settings";
+import List from "@/pages/list";
 import Demonlist from "@/pages/demonlist";
 import Leaderboard from "@/pages/leaderboard";
 import SubmitRecord from "@/pages/submit-record";
@@ -35,6 +36,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={isAuthenticated ? Home : Landing} />
+      <Route path="/list" component={List} />
       <Route path="/demonlist" component={Demonlist} />
       <Route path="/leaderboard" component={Leaderboard} />
       <Route path="/submit" component={SubmitRecord} />

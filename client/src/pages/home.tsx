@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Link } from "wouter";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
@@ -6,8 +5,6 @@ import { Card } from "@/components/ui/card";
 import { Trophy, Target, Users } from "lucide-react";
 
 export default function Home() {
-  const [selectedList, setSelectedList] = useState("demonlist");
-
   const lists = [
     { 
       value: "demonlist", 
@@ -31,15 +28,9 @@ export default function Home() {
     },
   ];
 
-  const currentListInfo = lists.find(l => l.value === selectedList);
-
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar 
-        showListSelector={true}
-        currentList={selectedList}
-        onListChange={setSelectedList}
-      />
+      <Navbar />
       
       <main className="flex-1 py-12">
         <div className="container mx-auto px-6">
@@ -54,14 +45,6 @@ export default function Home() {
                   Select a list to view demons and submit your completions
                 </p>
               </div>
-
-              <div className="pt-8">
-                <Button size="lg" asChild data-testid="button-view-selected-list">
-                  <Link href={`/demonlist?listType=${selectedList}`}>
-                    View {currentListInfo?.label}
-                  </Link>
-                </Button>
-              </div>
             </section>
 
             {/* List Cards */}
@@ -75,7 +58,6 @@ export default function Home() {
                   <Card
                     key={list.value}
                     className="p-6 cursor-pointer hover-elevate transition-all"
-                    onClick={() => setSelectedList(list.value)}
                     data-testid={`card-list-${list.value}`}
                   >
                     <h3 className="font-display font-bold text-xl mb-2">
@@ -88,7 +70,7 @@ export default function Home() {
                       size="sm"
                       data-testid={`button-view-${list.value}`}
                     >
-                      <Link href={`/demonlist?listType=${list.value}`}>
+                      <Link href={`/list?type=${list.value}`}>
                         View List →
                       </Link>
                     </Button>

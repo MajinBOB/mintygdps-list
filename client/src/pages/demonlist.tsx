@@ -1,22 +1,24 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { useAuth } from "@/hooks/useAuth";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import { DemonCard } from "@/components/DemonCard";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
-import { LogOut, PlusCircle, LayoutDashboard } from "lucide-react";
-import { Link } from "wouter";
-import type { Demon } from "@shared/schema";
+import { useLocation } from "wouter";
+import { Navbar } from "@/components/Navbar";
 
 export default function Demonlist() {
-  const { user, isAdmin } = useAuth();
-  const [difficultyFilter, setDifficultyFilter] = useState<string>("all");
-
-  const { data: demons, isLoading } = useQuery<Demon[]>({
-    queryKey: ["/api/demons"],
-  });
+  const [location] = useLocation();
+  
+  // Redirect to list page
+  if (typeof window !== "undefined") {
+    const queryParams = new URLSearchParams(location.split("?")[1]);
+    const listType = queryParams.get("type") || "demonlist";
+    window.location.href = `/list?type=${listType}`;
+  }
+  
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Navbar />
+      <main className="flex-1 flex items-center justify-center">
+        <p>Redirecting...</p>
+      </main>
+    </div>
+  );
 
   const filteredDemons = demons?.filter(
     demon => difficultyFilter === "all" || demon.difficulty === difficultyFilter
