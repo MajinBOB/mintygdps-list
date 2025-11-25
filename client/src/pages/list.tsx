@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { useLocation } from "wouter";
 import { Navbar } from "@/components/Navbar";
 import { DemonCard } from "@/components/DemonCard";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -7,16 +6,18 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { PlusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import type { Demon } from "@shared/schema";
 
 export default function ListPage() {
-  const [location] = useLocation();
   const [difficultyFilter, setDifficultyFilter] = useState<string>("all");
   
-  // Get listType from query params
-  const queryParams = new URLSearchParams(location.split("?")[1]);
-  const listType = queryParams.get("type") || "demonlist";
+  // Get listType from query params using window.location.search
+  const listType = useMemo(() => {
+    if (typeof window === "undefined") return "demonlist";
+    const params = new URLSearchParams(window.location.search);
+    return params.get("type") || "demonlist";
+  }, []);
 
   const { data: demons, isLoading } = useQuery<Demon[]>({
     queryKey: ["/api/demons", listType],
