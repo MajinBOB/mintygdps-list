@@ -16,6 +16,8 @@ import LevelDetail from "@/pages/level-detail";
 import Demonlist from "@/pages/demonlist";
 import Leaderboard from "@/pages/leaderboard";
 import SubmitRecord from "@/pages/submit-record";
+import Login from "@/pages/login";
+import Signup from "@/pages/signup";
 import AdminDashboard from "@/pages/admin-dashboard";
 import AdminDemons from "@/pages/admin-demons";
 import AdminSubmissions from "@/pages/admin-submissions";
@@ -42,6 +44,8 @@ function Router() {
       <Route path="/demonlist" component={Demonlist} />
       <Route path="/leaderboard" component={Leaderboard} />
       <Route path="/submit" component={SubmitRecord} />
+      <Route path="/login" component={Login} />
+      <Route path="/signup" component={Signup} />
       <Route path="/profile" component={Profile} />
       <Route path="/settings" component={Settings} />
       <Route path="/admin/dashboard" component={AdminDashboard} />

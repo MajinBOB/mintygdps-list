@@ -38,6 +38,7 @@ export const users = pgTable("users", {
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
+  passwordHash: varchar("password_hash"), // Optional - for custom login
   isAdmin: boolean("is_admin").notNull().default(false),
   isModerator: boolean("is_moderator").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow(),
