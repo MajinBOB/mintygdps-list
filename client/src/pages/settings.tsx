@@ -10,7 +10,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
 const usernameSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters").max(30, "Username must be less than 30 characters"),
@@ -19,7 +19,7 @@ const usernameSchema = z.object({
 type UsernameFormData = z.infer<typeof usernameSchema>;
 
 export default function Settings() {
-  const { user, isLoading, refetchUser } = useAuth();
+  const { user, isLoading } = useAuth();
   const [isUpdating, setIsUpdating] = useState(false);
   const { toast } = useToast();
 
@@ -38,7 +38,7 @@ export default function Settings() {
         title: "Success",
         description: "Username updated successfully!",
       });
-      await refetchUser();
+      await queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
     } catch (error: any) {
       toast({
         title: "Error",
