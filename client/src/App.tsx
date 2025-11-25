@@ -39,11 +39,11 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={isAuthenticated ? Home : Landing} />
-      <Route path="/list" component={List} />
-      <Route path="/level-detail" component={LevelDetail} />
+      <Route path="/list/:listType?" component={List} />
+      <Route path="/level-detail/:id" component={LevelDetail} />
       <Route path="/demonlist" component={Demonlist} />
       <Route path="/leaderboard" component={Leaderboard} />
-      <Route path="/submit" component={SubmitRecord} />
+      <Route path="/submit/:id?" component={SubmitRecord} />
       <Route path="/login" component={Login} />
       <Route path="/signup" component={Signup} />
       <Route path="/profile" component={Profile} />
