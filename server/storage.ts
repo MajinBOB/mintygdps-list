@@ -29,6 +29,7 @@ export interface IStorage {
   // Record operations
   getAllRecords(): Promise<any[]>;
   getRecordsByUser(userId: string): Promise<Record[]>;
+  getApprovedRecordsByDemon(demonId: string): Promise<any[]>;
   createRecord(userId: string, record: InsertRecord): Promise<Record>;
   approveRecord(recordId: string, reviewerId: string): Promise<void>;
   rejectRecord(recordId: string, reviewerId: string): Promise<void>;
@@ -139,6 +140,31 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(records)
       .where(eq(records.userId, userId))
+      .orderBy(desc(records.submittedAt));
+  }
+
+  async getApprovedRecordsByDemon(demonId: string): Promise<any[]> {
+    return await db
+      .select({
+        id: records.id,
+        userId: records.userId,
+        demonId: records.demonId,
+        videoUrl: records.videoUrl,
+        status: records.status,
+        submittedAt: records.submittedAt,
+        reviewedAt: records.reviewedAt,
+        user: {
+          id: users.id,
+          email: users.email,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          profileImageUrl: users.profileImageUrl,
+        },
+      })
+      .from(records)
+      .leftJoin(users, eq(records.userId, users.id))
+      .where(eq(records.status, "approved"))
+      .andWhere(eq(records.demonId, demonId))
       .orderBy(desc(records.submittedAt));
   }
 

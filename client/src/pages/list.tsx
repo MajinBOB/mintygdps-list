@@ -6,17 +6,18 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { PlusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
-import { useState, useMemo } from "react";
+import { useState, useEffect } from "react";
 import type { Demon } from "@shared/schema";
 
 export default function ListPage() {
   const [difficultyFilter, setDifficultyFilter] = useState<string>("all");
+  const [listType, setListType] = useState<string>("demonlist");
   
-  // Get listType from query params using window.location.search
-  const listType = useMemo(() => {
-    if (typeof window === "undefined") return "demonlist";
+  // Get listType from query params on mount and when URL changes
+  useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    return params.get("type") || "demonlist";
+    const type = params.get("type") || "demonlist";
+    setListType(type);
   }, []);
 
   const { data: demons, isLoading } = useQuery<Demon[]>({

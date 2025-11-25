@@ -41,6 +41,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get a specific demon by ID
+  app.get("/api/demons/:id", async (req, res) => {
+    try {
+      const demonId = req.params.id;
+      const demon = await storage.getDemon(demonId);
+      if (!demon) {
+        return res.status(404).json({ message: "Demon not found" });
+      }
+      res.json(demon);
+    } catch (error) {
+      console.error("Error fetching demon:", error);
+      res.status(500).json({ message: "Failed to fetch demon" });
+    }
+  });
+
+  // Get approved records for a demon
+  app.get("/api/demons/:id/records", async (req, res) => {
+    try {
+      const demonId = req.params.id;
+      const records = await storage.getApprovedRecordsByDemon(demonId);
+      res.json(records);
+    } catch (error) {
+      console.error("Error fetching records:", error);
+      res.status(500).json({ message: "Failed to fetch records" });
+    }
+  });
+
   // Get leaderboard
   app.get("/api/leaderboard", async (req, res) => {
     try {
