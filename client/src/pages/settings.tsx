@@ -2,10 +2,53 @@ import { useAuth } from "@/hooks/useAuth";
 import { Navbar } from "@/components/Navbar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useToast } from "@/hooks/use-toast";
 import { LogOut } from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { apiRequest } from "@/lib/queryClient";
+
+const usernameSchema = z.object({
+  username: z.string().min(3, "Username must be at least 3 characters").max(30, "Username must be less than 30 characters"),
+});
+
+type UsernameFormData = z.infer<typeof usernameSchema>;
 
 export default function Settings() {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, refetchUser } = useAuth();
+  const [isUpdating, setIsUpdating] = useState(false);
+  const { toast } = useToast();
+
+  const form = useForm<UsernameFormData>({
+    resolver: zodResolver(usernameSchema),
+    defaultValues: {
+      username: user?.username || "",
+    },
+  });
+
+  const onSubmit = async (data: UsernameFormData) => {
+    setIsUpdating(true);
+    try {
+      await apiRequest("PATCH", "/api/auth/profile", data);
+      toast({
+        title: "Success",
+        description: "Username updated successfully!",
+      });
+      await refetchUser();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update username",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
 
   if (isLoading || !user) {
     return (
@@ -34,7 +77,7 @@ export default function Settings() {
             <Card className="p-8">
               <h2 className="font-display font-bold text-2xl mb-6">Account</h2>
               
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <div>
                   <label className="text-sm font-medium">Email</label>
                   <p className="text-muted-foreground mt-1" data-testid="text-settings-email">
@@ -48,6 +91,35 @@ export default function Settings() {
                     {user.firstName} {user.lastName}
                   </p>
                 </div>
+
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="username"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Username</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="Your unique username"
+                              {...field}
+                              value={field.value || ""}
+                              data-testid="input-username"
+                            />
+                          </FormControl>
+                          <p className="text-xs text-muted-foreground mt-2">
+                            This will be displayed on the leaderboard
+                          </p>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button type="submit" disabled={isUpdating} data-testid="button-update-username">
+                      {isUpdating ? "Updating..." : "Update Username"}
+                    </Button>
+                  </form>
+                </Form>
 
                 <div className="pt-4 border-t">
                   <p className="text-sm font-medium mb-4">Danger Zone</p>

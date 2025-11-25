@@ -27,6 +27,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch('/api/auth/profile', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { username } = req.body;
+
+      if (!username || typeof username !== 'string' || username.trim().length === 0) {
+        return res.status(400).json({ message: "Username is required" });
+      }
+
+      const user = await storage.updateUserProfile(userId, username.trim());
+      res.json(user);
+    } catch (error: any) {
+      if (error.code === '23505') {
+        return res.status(409).json({ message: "Username already taken" });
+      }
+      console.error("Error updating profile:", error);
+      res.status(500).json({ message: "Failed to update profile" });
+    }
+  });
+
   // ============================================================================
   // PUBLIC ROUTES (No auth required)
   // ============================================================================

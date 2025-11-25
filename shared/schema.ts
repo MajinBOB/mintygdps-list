@@ -37,6 +37,7 @@ export const users = pgTable("users", {
   email: varchar("email").unique(),
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
+  username: varchar("username").unique(), // Optional - customizable username
   profileImageUrl: varchar("profile_image_url"),
   passwordHash: varchar("password_hash"), // Optional - for custom login
   isAdmin: boolean("is_admin").notNull().default(false),
@@ -58,6 +59,7 @@ export const demons = pgTable("demons", {
   name: text("name").notNull(),
   creator: text("creator").notNull(),
   verifier: text("verifier"),
+  verifierId: varchar("verifier_id").references(() => users.id, { onDelete: "set null" }), // Track which user verified it
   difficulty: varchar("difficulty", { length: 50 }).notNull(), // Easy, Medium, Hard, Insane, Extreme
   position: integer("position").notNull().unique(),
   points: integer("points").notNull(),

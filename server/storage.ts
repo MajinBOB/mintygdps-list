@@ -18,6 +18,7 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
+  updateUserProfile(userId: string, username: string): Promise<User>;
   getAllUsers(): Promise<User[]>;
 
   // Demon operations
@@ -69,6 +70,15 @@ export class DatabaseStorage implements IStorage {
 
   async getAllUsers(): Promise<User[]> {
     return await db.select().from(users);
+  }
+
+  async updateUserProfile(userId: string, username: string): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ username, updatedAt: new Date() })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
   }
 
   // Demon operations
@@ -267,29 +277,58 @@ export class DatabaseStorage implements IStorage {
 
   // Leaderboard operations
   async getLeaderboard(): Promise<any[]> {
-    // Calculate points for each user based on approved records
-    const result = await db
-      .select({
-        userId: records.userId,
+    // Get all users with their completion points and verifier points
+    const allUsers = await db.select().from(users);
+    
+    const leaderboard = await Promise.all(allUsers.map(async (user) => {
+      // Calculate completion points from approved records
+      const completionResult = await db
+        .select({
+          points: sql<number>`COALESCE(SUM(${demons.points}), 0)`,
+          completions: sql<number>`COUNT(${records.id})`,
+        })
+        .from(records)
+        .leftJoin(demons, eq(records.demonId, demons.id))
+        .where(eq(records.userId, user.id) && eq(records.status, "approved"));
+
+      // Calculate verifier points from demons they verified
+      const verifierResult = await db
+        .select({
+          verifierPoints: sql<number>`COALESCE(SUM(${demons.points}), 0)`,
+          verifiedCount: sql<number>`COUNT(${demons.id})`,
+        })
+        .from(demons)
+        .where(eq(demons.verifierId, user.id));
+
+      const completionPoints = completionResult[0]?.points || 0;
+      const completions = completionResult[0]?.completions || 0;
+      const verifierPoints = verifierResult[0]?.verifierPoints || 0;
+      const verifiedCount = verifierResult[0]?.verifiedCount || 0;
+      const totalPoints = completionPoints + verifierPoints;
+
+      return {
+        userId: user.id,
         user: {
-          id: users.id,
-          email: users.email,
-          firstName: users.firstName,
-          lastName: users.lastName,
-          profileImageUrl: users.profileImageUrl,
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          username: user.username,
+          profileImageUrl: user.profileImageUrl,
         },
-        points: sql<number>`SUM(${demons.points})`,
-        completions: sql<number>`COUNT(${records.id})`,
-      })
-      .from(records)
-      .leftJoin(users, eq(records.userId, users.id))
-      .leftJoin(demons, eq(records.demonId, demons.id))
-      .where(eq(records.status, "approved"))
-      .groupBy(records.userId, users.id, users.email, users.firstName, users.lastName, users.profileImageUrl)
-      .orderBy(desc(sql`SUM(${demons.points})`));
+        completionPoints,
+        verifierPoints,
+        points: totalPoints,
+        completions,
+        verifiedCount,
+      };
+    }));
+
+    // Sort by total points descending
+    const sorted = leaderboard.filter(entry => entry.points > 0).sort((a, b) => b.points - a.points);
 
     // Add rank to each entry
-    return result.map((entry, index) => ({
+    return sorted.map((entry, index) => ({
       ...entry,
       rank: index + 1,
     }));
