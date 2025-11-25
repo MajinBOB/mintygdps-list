@@ -37,7 +37,7 @@ export const users = pgTable("users", {
   email: varchar("email").unique(),
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
-  username: varchar("username").unique(), // Optional - customizable username
+  username: varchar("username"), // Optional - customizable username (not unique, allows duplicates)
   profileImageUrl: varchar("profile_image_url"),
   passwordHash: varchar("password_hash"), // Optional - for custom login
   isAdmin: boolean("is_admin").notNull().default(false),
