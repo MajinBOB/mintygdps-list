@@ -3,12 +3,14 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated, isAdmin } from "./replitAuth";
+import { setupCustomAuth } from "./customAuth";
 import { insertDemonSchema, insertRecordSchema } from "@shared/schema";
 import { fromError } from "zod-validation-error";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
+  await setupCustomAuth(app);
 
   // ============================================================================
   // AUTH ROUTES
