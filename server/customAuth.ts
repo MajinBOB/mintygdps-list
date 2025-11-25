@@ -39,13 +39,18 @@ export async function setupCustomAuth(app: Express) {
         return res.status(401).json({ message: "Invalid username or password" });
       }
 
-      // Set session
+      // Set session with user data
       req.session.user = {
         claims: { sub: user.id },
         username: user.username,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        isAdmin: user.isAdmin,
+        isModerator: user.isModerator,
       };
-
-      res.json({ message: "Logged in successfully" });
+      req.session.save(() => {
+        res.json({ message: "Logged in successfully" });
+      });
     } catch (error: any) {
       console.error("Login error:", error);
       res.status(500).json({ message: error.message || "Login failed" });
@@ -80,13 +85,18 @@ export async function setupCustomAuth(app: Express) {
         lastName,
       });
 
-      // Set session
+      // Set session with user data
       req.session.user = {
         claims: { sub: user.id },
         username: user.username,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        isAdmin: user.isAdmin,
+        isModerator: user.isModerator,
       };
-
-      res.json({ message: "Account created successfully" });
+      req.session.save(() => {
+        res.json({ message: "Account created successfully" });
+      });
     } catch (error: any) {
       console.error("Signup error:", error);
       res.status(500).json({ message: error.message || "Signup failed" });

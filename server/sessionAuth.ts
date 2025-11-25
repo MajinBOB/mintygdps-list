@@ -25,20 +25,29 @@ export function getSession() {
   });
 }
 
+// Middleware to make session.user available as req.user
+export function attachUserToRequest(req: any, res: any, next: any) {
+  if (req.session?.user) {
+    req.user = req.session.user;
+  }
+  next();
+}
+
 export async function setupSessionAuth(app: Express) {
   app.set("trust proxy", 1);
   app.use(getSession());
+  app.use(attachUserToRequest);
 }
 
 export function isAuthenticated(req: any, res: any, next: any) {
-  if (req.session?.user?.claims?.sub) {
+  if (req.user?.claims?.sub) {
     return next();
   }
   res.status(401).json({ message: "Unauthorized" });
 }
 
 export function isAdmin(req: any, res: any, next: any) {
-  if (req.session?.user?.isAdmin) {
+  if (req.user?.isAdmin) {
     return next();
   }
   res.status(403).json({ message: "Forbidden" });
