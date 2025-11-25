@@ -169,7 +169,7 @@ export class DatabaseStorage implements IStorage {
         reviewedBy: records.reviewedBy,
         user: {
           id: users.id,
-          email: users.email,
+          username: users.username,
           firstName: users.firstName,
           lastName: users.lastName,
           profileImageUrl: users.profileImageUrl,
@@ -210,7 +210,7 @@ export class DatabaseStorage implements IStorage {
         reviewedAt: records.reviewedAt,
         user: {
           id: users.id,
-          email: users.email,
+          username: users.username,
           firstName: users.firstName,
           lastName: users.lastName,
           profileImageUrl: users.profileImageUrl,
@@ -310,10 +310,9 @@ export class DatabaseStorage implements IStorage {
         userId: user.id,
         user: {
           id: user.id,
-          email: user.email,
+          username: user.username,
           firstName: user.firstName,
           lastName: user.lastName,
-          username: user.username,
           profileImageUrl: user.profileImageUrl,
         },
         completionPoints,
