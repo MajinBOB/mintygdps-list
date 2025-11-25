@@ -44,7 +44,7 @@ export function Navbar() {
           ) : (
             <>
               <Button variant="ghost" size="sm" asChild data-testid="button-login">
-                <a href="/api/login">Login</a>
+                <a href="/login">Login</a>
               </Button>
             </>
           )}

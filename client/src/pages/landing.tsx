@@ -16,7 +16,7 @@ export default function Landing() {
           <div className="flex items-center gap-4">
             <ThemeToggle />
             <Button asChild data-testid="button-login">
-              <a href="/api/login">Login</a>
+              <a href="/login">Login</a>
             </Button>
           </div>
         </div>
@@ -41,7 +41,7 @@ export default function Landing() {
             
             <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
               <Button size="lg" asChild className="text-lg px-8" data-testid="button-view-demonlist">
-                <a href="/api/login">
+                <a href="/demonlist">
                   View Demonlist
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </a>
@@ -53,7 +53,7 @@ export default function Landing() {
                 className="text-lg px-8 bg-background/10 backdrop-blur border-white/20 text-white hover:bg-background/20"
                 data-testid="button-submit-record"
               >
-                <a href="/api/login">Submit Record</a>
+                <a href="/submit">Submit Record</a>
               </Button>
             </div>
             
@@ -127,7 +127,7 @@ export default function Landing() {
             Sign in to submit your records, track your progress, and compete with the best
           </p>
           <Button size="lg" asChild className="text-lg px-8" data-testid="button-get-started">
-            <a href="/api/login">
+            <a href="/login">
               Get Started
               <ArrowRight className="ml-2 h-5 w-5" />
             </a>
