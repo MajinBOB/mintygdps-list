@@ -39,6 +39,7 @@ export const users = pgTable("users", {
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
   isAdmin: boolean("is_admin").notNull().default(false),
+  isModerator: boolean("is_moderator").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -61,6 +62,7 @@ export const demons = pgTable("demons", {
   points: integer("points").notNull(),
   videoUrl: text("video_url"),
   completionCount: integer("completion_count").notNull().default(0),
+  listType: varchar("list_type", { length: 50 }).notNull().default("demonlist"), // demonlist, challenge, unrated, upcoming
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -74,6 +76,7 @@ export const insertDemonSchema = createInsertSchema(demons).omit({
   difficulty: z.enum(["Easy", "Medium", "Hard", "Insane", "Extreme"]),
   position: z.number().int().positive(),
   points: z.number().int().positive(),
+  listType: z.enum(["demonlist", "challenge", "unrated", "upcoming"]).default("demonlist"),
 });
 
 export type InsertDemon = z.infer<typeof insertDemonSchema>;
