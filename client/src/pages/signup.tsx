@@ -12,11 +12,11 @@ import { apiRequest } from "@/lib/queryClient";
 import { Link } from "wouter";
 
 const signupSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
+  username: z.string().min(3, "Username must be at least 3 characters").max(30),
   password: z.string().min(8, "Password must be at least 8 characters"),
   confirmPassword: z.string(),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
@@ -32,11 +32,11 @@ export default function Signup() {
   const form = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
-      email: "",
-      firstName: "",
-      lastName: "",
+      username: "",
       password: "",
       confirmPassword: "",
+      firstName: "",
+      lastName: "",
     },
   });
 
@@ -44,10 +44,10 @@ export default function Signup() {
     setIsLoading(true);
     try {
       await apiRequest("POST", "/api/auth/signup", {
-        email: data.email,
-        firstName: data.firstName,
-        lastName: data.lastName,
+        username: data.username,
         password: data.password,
+        firstName: data.firstName || undefined,
+        lastName: data.lastName || undefined,
       });
       toast({
         title: "Success",
@@ -75,56 +75,17 @@ export default function Signup() {
         <CardContent className="space-y-6">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="firstName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>First Name</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="John"
-                          {...field}
-                          data-testid="input-signup-first-name"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="lastName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Last Name</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Doe"
-                          {...field}
-                          data-testid="input-signup-last-name"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
               <FormField
                 control={form.control}
-                name="email"
+                name="username"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel>Username</FormLabel>
                     <FormControl>
                       <Input
-                        type="email"
-                        placeholder="you@example.com"
+                        placeholder="your_username"
                         {...field}
-                        data-testid="input-signup-email"
+                        data-testid="input-signup-username"
                       />
                     </FormControl>
                     <FormMessage />
@@ -169,6 +130,47 @@ export default function Signup() {
                   </FormItem>
                 )}
               />
+
+              <div className="border-t pt-4">
+                <p className="text-xs text-muted-foreground mb-3">Optional - Display name (can be set later)</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <FormField
+                    control={form.control}
+                    name="firstName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs">First Name</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="First"
+                            {...field}
+                            value={field.value || ""}
+                            data-testid="input-signup-first-name"
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="lastName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs">Last Name</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Last"
+                            {...field}
+                            value={field.value || ""}
+                            data-testid="input-signup-last-name"
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
 
               <Button
                 type="submit"

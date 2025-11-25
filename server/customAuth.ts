@@ -1,4 +1,4 @@
-// Custom email/password authentication
+// Custom username/password authentication
 import * as bcrypt from "bcryptjs";
 import { storage } from "./storage";
 import type { Express } from "express";
@@ -6,15 +6,15 @@ import { fromError } from "zod-validation-error";
 import { z } from "zod";
 
 const loginSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(6),
+  username: z.string().min(3, "Username must be at least 3 characters"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
 const signupSchema = z.object({
-  email: z.string().email(),
-  firstName: z.string().min(1),
-  lastName: z.string().min(1),
-  password: z.string().min(8),
+  username: z.string().min(3, "Username must be at least 3 characters").max(30),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
 });
 
 export async function setupCustomAuth(app: Express) {
@@ -27,22 +27,22 @@ export async function setupCustomAuth(app: Express) {
         return res.status(400).json({ message: error.toString() });
       }
 
-      const { email, password } = validation.data;
-      const user = await storage.getUserByEmail(email);
+      const { username, password } = validation.data;
+      const user = await storage.getUserByUsername(username);
 
       if (!user || !user.passwordHash) {
-        return res.status(401).json({ message: "Invalid email or password" });
+        return res.status(401).json({ message: "Invalid username or password" });
       }
 
       const isValidPassword = await bcrypt.compare(password, user.passwordHash);
       if (!isValidPassword) {
-        return res.status(401).json({ message: "Invalid email or password" });
+        return res.status(401).json({ message: "Invalid username or password" });
       }
 
       // Set session
       req.session.user = {
-        claims: { sub: user.id, email: user.email },
-        customAuth: true,
+        claims: { sub: user.id },
+        username: user.username,
       };
 
       res.json({ message: "Logged in successfully" });
@@ -61,12 +61,12 @@ export async function setupCustomAuth(app: Express) {
         return res.status(400).json({ message: error.toString() });
       }
 
-      const { email, firstName, lastName, password } = validation.data;
+      const { username, password, firstName, lastName } = validation.data;
 
-      // Check if user already exists
-      const existingUser = await storage.getUserByEmail(email);
+      // Check if username already exists
+      const existingUser = await storage.getUserByUsername(username);
       if (existingUser) {
-        return res.status(409).json({ message: "Email already in use" });
+        return res.status(409).json({ message: "Username already taken" });
       }
 
       // Hash password
@@ -74,16 +74,16 @@ export async function setupCustomAuth(app: Express) {
 
       // Create user
       const user = await storage.upsertUser({
-        email,
+        username,
+        passwordHash,
         firstName,
         lastName,
-        passwordHash,
       });
 
       // Set session
       req.session.user = {
-        claims: { sub: user.id, email: user.email },
-        customAuth: true,
+        claims: { sub: user.id },
+        username: user.username,
       };
 
       res.json({ message: "Account created successfully" });

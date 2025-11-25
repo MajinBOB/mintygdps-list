@@ -79,9 +79,9 @@ export default function Settings() {
               
               <div className="space-y-6">
                 <div>
-                  <label className="text-sm font-medium">Email</label>
-                  <p className="text-muted-foreground mt-1" data-testid="text-settings-email">
-                    {user.email}
+                  <label className="text-sm font-medium">Username</label>
+                  <p className="text-muted-foreground mt-1" data-testid="text-settings-username">
+                    {user.username}
                   </p>
                 </div>
                 

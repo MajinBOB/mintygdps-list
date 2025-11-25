@@ -12,7 +12,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { Link } from "wouter";
 
 const loginSchema = z.object({
-  email: z.string().email("Invalid email address"),
+  username: z.string().min(3, "Username must be at least 3 characters"),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
@@ -26,7 +26,7 @@ export default function Login() {
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "",
+      username: "",
       password: "",
     },
   });
@@ -34,7 +34,7 @@ export default function Login() {
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
     try {
-      const response = await apiRequest("POST", "/api/auth/login", data);
+      await apiRequest("POST", "/api/auth/login", data);
       toast({
         title: "Success",
         description: "Logged in successfully!",
@@ -43,7 +43,7 @@ export default function Login() {
     } catch (error: any) {
       toast({
         title: "Login Failed",
-        description: error.message || "Invalid email or password",
+        description: error.message || "Invalid username or password",
         variant: "destructive",
       });
     } finally {
@@ -63,16 +63,15 @@ export default function Login() {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
                 control={form.control}
-                name="email"
+                name="username"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel>Username</FormLabel>
                     <FormControl>
                       <Input
-                        type="email"
-                        placeholder="you@example.com"
+                        placeholder="your_username"
                         {...field}
-                        data-testid="input-login-email"
+                        data-testid="input-login-username"
                       />
                     </FormControl>
                     <FormMessage />
@@ -109,24 +108,6 @@ export default function Login() {
               </Button>
             </form>
           </Form>
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-background text-muted-foreground">Or continue with</span>
-            </div>
-          </div>
-
-          <Button
-            variant="outline"
-            className="w-full"
-            asChild
-            data-testid="button-replit-login"
-          >
-            <a href="/api/login">Replit Account</a>
-          </Button>
 
           <div className="text-center text-sm">
             <span className="text-muted-foreground">Don't have an account? </span>

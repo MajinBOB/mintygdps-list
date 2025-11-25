@@ -31,15 +31,14 @@ export const sessions = pgTable(
   (table) => [index("IDX_session_expire").on(table.expire)],
 );
 
-// User storage table - Required for Replit Auth
+// User storage table - Username/password based authentication
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  email: varchar("email").unique(),
+  username: varchar("username").unique().notNull(),
+  passwordHash: varchar("password_hash").notNull(),
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
-  username: varchar("username"), // Optional - customizable username (not unique, allows duplicates)
   profileImageUrl: varchar("profile_image_url"),
-  passwordHash: varchar("password_hash"), // Optional - for custom login
   isAdmin: boolean("is_admin").notNull().default(false),
   isModerator: boolean("is_moderator").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow(),
