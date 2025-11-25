@@ -18,8 +18,9 @@ export function ProfileDropdown() {
 
   if (!user) return null;
 
-  const initials = ((user.firstName || "")[0] + (user.lastName || "")[0])
-    .toUpperCase() || "U";
+  const firstName = user.firstName || "";
+  const lastName = user.lastName || "";
+  const initials = ((firstName[0] || "") + (lastName[0] || "")).toUpperCase() || "U";
 
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
@@ -44,9 +45,11 @@ export function ProfileDropdown() {
           </Avatar>
           <div className="flex flex-col gap-1">
             <p className="text-sm font-medium" data-testid="text-username">
-              {user.firstName} {user.lastName}
+              {user.username}
             </p>
-            <p className="text-xs text-muted-foreground">{user.email}</p>
+            {user.firstName && user.lastName && (
+              <p className="text-xs text-muted-foreground">{user.firstName} {user.lastName}</p>
+            )}
           </div>
         </div>
         <DropdownMenuSeparator />
@@ -69,7 +72,7 @@ export function ProfileDropdown() {
         )}
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild data-testid="menu-item-logout">
-          <a href="/api/logout">Log out</a>
+          <a href="/logout">Log out</a>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
