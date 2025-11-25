@@ -29,10 +29,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // PUBLIC ROUTES (No auth required)
   // ============================================================================
 
-  // Get all demons
+  // Get all demons (with optional listType filter)
   app.get("/api/demons", async (req, res) => {
     try {
-      const demons = await storage.getAllDemons();
+      const listType = req.query.listType as string | undefined;
+      const demons = await storage.getAllDemons(listType);
       res.json(demons);
     } catch (error) {
       console.error("Error fetching demons:", error);

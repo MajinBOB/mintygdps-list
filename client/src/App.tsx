@@ -9,6 +9,8 @@ import { useAuth } from "@/hooks/useAuth";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
 import Home from "@/pages/home";
+import Profile from "@/pages/profile";
+import Settings from "@/pages/settings";
 import Demonlist from "@/pages/demonlist";
 import Leaderboard from "@/pages/leaderboard";
 import SubmitRecord from "@/pages/submit-record";
@@ -36,6 +38,8 @@ function Router() {
       <Route path="/demonlist" component={Demonlist} />
       <Route path="/leaderboard" component={Leaderboard} />
       <Route path="/submit" component={SubmitRecord} />
+      <Route path="/profile" component={Profile} />
+      <Route path="/settings" component={Settings} />
       <Route path="/admin/dashboard" component={AdminDashboard} />
       <Route path="/admin/demons" component={AdminDemons} />
       <Route path="/admin/submissions" component={AdminSubmissions} />

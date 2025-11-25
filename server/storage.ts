@@ -64,7 +64,14 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Demon operations
-  async getAllDemons(): Promise<Demon[]> {
+  async getAllDemons(listType?: string): Promise<Demon[]> {
+    if (listType && listType !== "all") {
+      return await db
+        .select()
+        .from(demons)
+        .where(eq(demons.listType, listType))
+        .orderBy(demons.position);
+    }
     return await db.select().from(demons).orderBy(demons.position);
   }
 
