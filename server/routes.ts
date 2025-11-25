@@ -203,6 +203,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Reorder demons and recalculate points (admin only)
+  app.post("/api/admin/demons/reorder", isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { demons: demonOrder, listType } = req.body;
+      
+      if (!Array.isArray(demonOrder) || !listType) {
+        return res.status(400).json({ message: "Invalid request data" });
+      }
+
+      await storage.reorderDemons(demonOrder, listType);
+      res.json({ message: "Demons reordered and points recalculated" });
+    } catch (error: any) {
+      console.error("Error reordering demons:", error);
+      res.status(500).json({ message: error.message || "Failed to reorder demons" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;

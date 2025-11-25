@@ -25,6 +25,7 @@ export interface IStorage {
   createDemon(demon: InsertDemon): Promise<Demon>;
   updateDemon(id: string, demon: Partial<InsertDemon>): Promise<Demon>;
   deleteDemon(id: string): Promise<void>;
+  reorderDemons(demonOrder: Array<{ id: string; position: number }>, listType: string): Promise<void>;
 
   // Record operations
   getAllRecords(): Promise<any[]>;
@@ -97,6 +98,31 @@ export class DatabaseStorage implements IStorage {
 
   async deleteDemon(id: string): Promise<void> {
     await db.delete(demons).where(eq(demons.id, id));
+  }
+
+  async reorderDemons(demonOrder: Array<{ id: string; position: number }>, listType: string): Promise<void> {
+    // Calculate points based on position (rank #1 = 300 pts, rank #200 = 1 pt, 201+ = 0 pts)
+    const calculatePoints = (position: number): number => {
+      if (position < 1 || position > 200) return 0;
+      if (position === 1) return 300;
+      if (position === 200) return 1;
+      // Linear interpolation: points = 300 - ((position - 1) * 299 / 199)
+      const points = 300 - ((position - 1) * 299 / 199);
+      return Math.round(points);
+    };
+
+    // Update each demon's position and recalculate points
+    for (const { id, position } of demonOrder) {
+      const points = calculatePoints(position);
+      await db
+        .update(demons)
+        .set({
+          position,
+          points,
+          updatedAt: new Date(),
+        })
+        .where(eq(demons.id, id));
+    }
   }
 
   // Record operations

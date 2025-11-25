@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { isUnauthorizedError } from "@/lib/authUtils";
@@ -14,13 +14,77 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, GripVertical } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertDemonSchema } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import type { Demon } from "@shared/schema";
 import type { z } from "zod";
+
+// Draggable demon card wrapper
+function DraggableDemonCard({ demon, onEdit, onDelete }: {
+  demon: Demon;
+  onEdit: (demon: Demon) => void;
+  onDelete: (demon: Demon) => void;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: demon.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="flex items-center gap-4"
+    >
+      <div
+        {...attributes}
+        {...listeners}
+        className="flex-shrink-0 cursor-grab active:cursor-grabbing p-2 hover:bg-secondary rounded"
+        data-testid={`drag-handle-${demon.id}`}
+      >
+        <GripVertical className="h-5 w-5 text-muted-foreground" />
+      </div>
+      <div className="flex-1">
+        <DemonCard
+          demon={demon}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          showActions
+        />
+      </div>
+    </div>
+  );
+}
 
 export default function AdminDemons() {
   const { isAuthenticated, isLoading, isAdmin } = useAuth();
@@ -28,6 +92,8 @@ export default function AdminDemons() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingDemon, setEditingDemon] = useState<Demon | null>(null);
   const [deletingDemon, setDeletingDemon] = useState<Demon | null>(null);
+  const [selectedListType, setSelectedListType] = useState<string>("demonlist");
+  const [isReordering, setIsReordering] = useState(false);
 
   useEffect(() => {
     if (!isLoading && (!isAuthenticated || !isAdmin)) {
@@ -42,9 +108,24 @@ export default function AdminDemons() {
     }
   }, [isAuthenticated, isLoading, isAdmin, toast]);
 
-  const { data: demons, isLoading: demonsLoading } = useQuery<Demon[]>({
+  const { data: allDemons, isLoading: demonsLoading } = useQuery<Demon[]>({
     queryKey: ["/api/demons"],
   });
+
+  // Filter demons by selected list type
+  const demons = useMemo(() => {
+    if (!allDemons) return [];
+    return allDemons
+      .filter((d) => d.listType === selectedListType)
+      .sort((a, b) => a.position - b.position);
+  }, [allDemons, selectedListType]);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { distance: 8 }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   const form = useForm<z.infer<typeof insertDemonSchema>>({
     resolver: zodResolver(insertDemonSchema),
@@ -56,6 +137,7 @@ export default function AdminDemons() {
       position: 1,
       points: 100,
       videoUrl: "",
+      listType: "demonlist",
     },
   });
 
@@ -131,6 +213,29 @@ export default function AdminDemons() {
     },
   });
 
+  const reorderMutation = useMutation({
+    mutationFn: async (order: Array<{ id: string; position: number }>) => {
+      await apiRequest("POST", "/api/admin/demons/reorder", { demons: order, listType: selectedListType });
+    },
+    onSuccess: () => {
+      toast({ title: "Order Updated", description: "Demon positions and points have been recalculated." });
+      queryClient.invalidateQueries({ queryKey: ["/api/demons"] });
+      setIsReordering(false);
+    },
+    onError: (error: Error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => { window.location.href = "/api/login"; }, 500);
+        return;
+      }
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    },
+  });
+
   const handleEdit = (demon: Demon) => {
     setEditingDemon(demon);
     form.reset({
@@ -141,6 +246,7 @@ export default function AdminDemons() {
       position: demon.position,
       points: demon.points,
       videoUrl: demon.videoUrl || "",
+      listType: demon.listType as any,
     });
     setIsDialogOpen(true);
   };
@@ -153,6 +259,23 @@ export default function AdminDemons() {
     }
   };
 
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = demons.findIndex((d) => d.id === active.id);
+      const newIndex = demons.findIndex((d) => d.id === over.id);
+
+      const newOrder = arrayMove(demons, oldIndex, newIndex);
+      const reorderData = newOrder.map((demon, index) => ({
+        id: demon.id,
+        position: index + 1,
+      }));
+
+      reorderMutation.mutate(reorderData);
+    }
+  };
+
   const style = {
     "--sidebar-width": "16rem",
   };
@@ -160,6 +283,13 @@ export default function AdminDemons() {
   if (!isAuthenticated || !isAdmin) {
     return null;
   }
+
+  const listLabels: Record<string, string> = {
+    demonlist: "Demonlist",
+    challenge: "Challenge List",
+    unrated: "Unrated List",
+    upcoming: "Upcoming List",
+  };
 
   return (
     <SidebarProvider style={style as React.CSSProperties}>
@@ -172,11 +302,29 @@ export default function AdminDemons() {
           </header>
           <main className="flex-1 overflow-auto p-8">
             <div className="max-w-6xl mx-auto space-y-8">
+              {/* List Type Selector */}
+              <div className="flex items-center gap-4">
+                <span className="text-sm font-medium">Manage List:</span>
+                <div className="flex gap-2">
+                  {Object.entries(listLabels).map(([type, label]) => (
+                    <Button
+                      key={type}
+                      variant={selectedListType === type ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setSelectedListType(type)}
+                      data-testid={`button-select-list-${type}`}
+                    >
+                      {label}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
               <div className="flex items-end justify-between gap-4">
                 <div>
-                  <h1 className="font-display font-bold text-4xl mb-2">Manage Demons</h1>
+                  <h1 className="font-display font-bold text-4xl mb-2">Manage {listLabels[selectedListType]}</h1>
                   <p className="text-muted-foreground text-lg">
-                    Add, edit, or remove demons from the list
+                    Add, edit, remove, or reorder demons from the {listLabels[selectedListType]}. Drag to reorder and automatically update rankings and points.
                   </p>
                 </div>
 
@@ -199,6 +347,30 @@ export default function AdminDemons() {
                     </DialogHeader>
                     <Form {...form}>
                       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+                        <FormField
+                          control={form.control}
+                          name="listType"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>List Type</FormLabel>
+                              <Select onValueChange={field.onChange} value={field.value}>
+                                <FormControl>
+                                  <SelectTrigger data-testid="select-list-type">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="demonlist">Demonlist</SelectItem>
+                                  <SelectItem value="challenge">Challenge List</SelectItem>
+                                  <SelectItem value="unrated">Unrated List</SelectItem>
+                                  <SelectItem value="upcoming">Upcoming List</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
                         <div className="grid grid-cols-2 gap-4">
                           <FormField
                             control={form.control}
@@ -341,20 +513,30 @@ export default function AdminDemons() {
                 </div>
               ) : !demons || demons.length === 0 ? (
                 <div className="text-center py-16">
-                  <p className="text-muted-foreground text-lg">No demons yet. Add your first demon!</p>
+                  <p className="text-muted-foreground text-lg">No demons in this list yet. Add your first demon!</p>
                 </div>
               ) : (
-                <div className="space-y-4">
-                  {demons.sort((a, b) => a.position - b.position).map(demon => (
-                    <DemonCard
-                      key={demon.id}
-                      demon={demon}
-                      onEdit={handleEdit}
-                      onDelete={setDeletingDemon}
-                      showActions
-                    />
-                  ))}
-                </div>
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={handleDragEnd}
+                >
+                  <SortableContext
+                    items={demons.map((d) => d.id)}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    <div className="space-y-4">
+                      {demons.map((demon) => (
+                        <DraggableDemonCard
+                          key={demon.id}
+                          demon={demon}
+                          onEdit={handleEdit}
+                          onDelete={setDeletingDemon}
+                        />
+                      ))}
+                    </div>
+                  </SortableContext>
+                </DndContext>
               )}
             </div>
           </main>
