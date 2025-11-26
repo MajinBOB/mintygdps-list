@@ -430,9 +430,15 @@ export class DatabaseStorage implements IStorage {
       const verifiedCount = Number(verifierResult[0]?.verifiedCount) || 0;
 
       // Calculate pack completion bonus points
-      const userPacks = await this.getPacksByUser(user.id);
-      const completedPacks = userPacks.filter(p => p.isCompleted);
-      const packBonusPoints = completedPacks.reduce((sum, pack) => sum + pack.points, 0);
+      let packBonusPoints = 0;
+      try {
+        const userPacks = await this.getPacksByUser(user.id);
+        const completedPacks = userPacks.filter(p => p.isCompleted);
+        packBonusPoints = completedPacks.reduce((sum, pack) => sum + pack.points, 0);
+      } catch (error) {
+        // Silently fail if packs feature not ready
+        packBonusPoints = 0;
+      }
 
       const totalPoints = completionPoints + verifierPoints + packBonusPoints;
       // Verified levels count as completions
@@ -500,9 +506,15 @@ export class DatabaseStorage implements IStorage {
     const verifierPoints = verifiedDemons.reduce((sum, d) => sum + (d.points || 0), 0);
     
     // Calculate pack completion bonus points
-    const userPacks = await this.getPacksByUser(userId);
-    const completedPacks = userPacks.filter(p => p.isCompleted);
-    const packBonusPoints = completedPacks.reduce((sum, pack) => sum + pack.points, 0);
+    let packBonusPoints = 0;
+    try {
+      const userPacks = await this.getPacksByUser(userId);
+      const completedPacks = userPacks.filter(p => p.isCompleted);
+      packBonusPoints = completedPacks.reduce((sum, pack) => sum + pack.points, 0);
+    } catch (error) {
+      // Silently fail if packs feature not ready
+      packBonusPoints = 0;
+    }
     
     const totalPoints = completionPoints + verifierPoints + packBonusPoints;
 
