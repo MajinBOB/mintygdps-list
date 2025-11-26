@@ -1,4 +1,4 @@
-import { useParams, useLocation } from "wouter";
+import { useParams, useLocation, Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
@@ -121,26 +121,29 @@ export default function PlayerDetail() {
               ) : (
                 <div className="space-y-4">
                   {player.completedLevels.map((level) => (
-                    <Card
-                      key={level.id}
-                      className="p-4"
-                      data-testid={`card-completed-${level.id}`}
-                    >
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-lg">{level.name}</h3>
-                          <p className="text-sm text-muted-foreground">
-                            By {level.creator}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-bold text-lg">#{level.position}</p>
-                          <p className="text-sm text-primary font-semibold">
-                            {level.points} pts
-                          </p>
-                        </div>
-                      </div>
-                    </Card>
+                    <Link key={level.id} href={`/level-detail/${level.id}`}>
+                      <a
+                        className="block"
+                        data-testid={`card-completed-${level.id}`}
+                      >
+                        <Card className="p-4 hover-elevate cursor-pointer">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1">
+                              <h3 className="font-semibold text-lg">{level.name}</h3>
+                              <p className="text-sm text-muted-foreground">
+                                By {level.creator}
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-bold text-lg">#{level.position}</p>
+                              <p className="text-sm text-primary font-semibold">
+                                {level.points} pts
+                              </p>
+                            </div>
+                          </div>
+                        </Card>
+                      </a>
+                    </Link>
                   ))}
                 </div>
               )}
@@ -156,26 +159,29 @@ export default function PlayerDetail() {
               ) : (
                 <div className="space-y-4">
                   {player.verifiedLevels.map((level) => (
-                    <Card
-                      key={level.id}
-                      className="p-4"
-                      data-testid={`card-verified-${level.id}`}
-                    >
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-lg">{level.name}</h3>
-                          <p className="text-sm text-muted-foreground">
-                            By {level.creator}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-bold text-lg">#{level.position}</p>
-                          <p className="text-sm text-accent font-semibold">
-                            {level.points} pts
-                          </p>
-                        </div>
-                      </div>
-                    </Card>
+                    <Link key={level.id} href={`/level-detail/${level.id}`}>
+                      <a
+                        className="block"
+                        data-testid={`card-verified-${level.id}`}
+                      >
+                        <Card className="p-4 hover-elevate cursor-pointer">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1">
+                              <h3 className="font-semibold text-lg">{level.name}</h3>
+                              <p className="text-sm text-muted-foreground">
+                                By {level.creator}
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-bold text-lg">#{level.position}</p>
+                              <p className="text-sm text-accent font-semibold">
+                                {level.points} pts
+                              </p>
+                            </div>
+                          </div>
+                        </Card>
+                      </a>
+                    </Link>
                   ))}
                 </div>
               )}
