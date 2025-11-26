@@ -133,9 +133,11 @@ export default function ListPage() {
                 </p>
               </div>
             ) : (
-              <div className="space-y-6">
+              <div className="space-y-4">
                 {filteredDemons.map((demon) => (
-                  <DemonCard key={demon.id} demon={demon} />
+                  <div key={demon.id} className="px-2">
+                    <DemonCard demon={demon} />
+                  </div>
                 ))}
               </div>
             )}
