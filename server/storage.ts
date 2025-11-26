@@ -301,6 +301,8 @@ export class DatabaseStorage implements IStorage {
       const verifierPoints = verifierResult[0]?.verifierPoints || 0;
       const verifiedCount = verifierResult[0]?.verifiedCount || 0;
       const totalPoints = completionPoints + verifierPoints;
+      // Verified levels count as completions
+      const totalCompletions = completions + verifiedCount;
 
       return {
         userId: user.id,
@@ -312,7 +314,7 @@ export class DatabaseStorage implements IStorage {
         completionPoints,
         verifierPoints,
         points: totalPoints,
-        completions,
+        completions: totalCompletions,
         verifiedCount,
       };
     }));

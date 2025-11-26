@@ -1,6 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Trophy } from "lucide-react";
 import { getInitials } from "@/lib/initials";
+import { Link } from "wouter";
 import type { User } from "@shared/schema";
 
 type LeaderboardEntry = {
@@ -22,15 +23,15 @@ export function LeaderboardTable({ entries }: LeaderboardTableProps) {
         const userInitials = getInitials(entry.user);
         
         return (
-          <div
-            key={entry.user.id}
-            className={`flex items-center gap-4 p-4 rounded-lg ${
-              isTopThree 
-                ? 'bg-gradient-to-r from-primary/5 to-accent/5 border border-primary/20' 
-                : 'bg-card hover-elevate'
-            }`}
-            data-testid={`row-leaderboard-${index}`}
-          >
+          <Link key={entry.user.id} href={`/player/${entry.user.id}`}>
+            <a
+              className={`flex items-center gap-4 p-4 rounded-lg cursor-pointer ${
+                isTopThree 
+                  ? 'bg-gradient-to-r from-primary/5 to-accent/5 border border-primary/20 hover-elevate' 
+                  : 'bg-card hover-elevate'
+              }`}
+              data-testid={`row-leaderboard-${index}`}
+            >
             <div className={`flex items-center justify-center w-12 h-12 rounded-lg font-display font-bold ${
               index === 0 
                 ? 'bg-gradient-to-br from-amber-400 to-amber-600 text-white text-2xl'
@@ -63,7 +64,8 @@ export function LeaderboardTable({ entries }: LeaderboardTableProps) {
               </p>
               <p className="text-xs text-muted-foreground uppercase tracking-wide">Points</p>
             </div>
-          </div>
+            </a>
+          </Link>
         );
       })}
     </div>
