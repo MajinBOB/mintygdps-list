@@ -61,16 +61,21 @@ export default function AdminPacks() {
         points: parseInt(newPackPoints),
         listType,
       };
-      const response = (await apiRequest("POST", "/api/admin/packs", packData)) as { id: string };
+      const pack = await apiRequest("POST", "/api/admin/packs", packData);
+      const packId = (pack as any)?.id;
+      
+      if (!packId) {
+        throw new Error("Pack creation failed: no ID returned");
+      }
       
       // Add selected levels to the pack
       if (selectedLevelIds.size > 0) {
         for (const demonId of Array.from(selectedLevelIds)) {
-          await apiRequest("POST", `/api/admin/packs/${response.id}/levels`, { demonId });
+          await apiRequest("POST", `/api/admin/packs/${packId}/levels`, { demonId });
         }
       }
       
-      return response;
+      return pack;
     },
     onSuccess: () => {
       toast({ title: "Pack Created", description: "New pack has been created successfully." });
