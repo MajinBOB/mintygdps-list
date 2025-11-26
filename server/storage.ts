@@ -11,7 +11,7 @@ import {
   type InsertRecord,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, sql } from "drizzle-orm";
+import { eq, desc, sql, and } from "drizzle-orm";
 
 export interface IStorage {
   // User operations
@@ -214,7 +214,7 @@ export class DatabaseStorage implements IStorage {
       })
       .from(records)
       .leftJoin(users, eq(records.userId, users.id))
-      .where(eq(records.status, "approved") && eq(records.demonId, demonId))
+      .where(and(eq(records.status, "approved"), eq(records.demonId, demonId)))
       .orderBy(desc(records.submittedAt));
   }
 
@@ -285,7 +285,7 @@ export class DatabaseStorage implements IStorage {
         })
         .from(records)
         .leftJoin(demons, eq(records.demonId, demons.id))
-        .where(eq(records.userId, user.id) && eq(records.status, "approved"));
+        .where(and(eq(records.userId, user.id), eq(records.status, "approved")));
 
       // Calculate verifier points from demons they verified
       const verifierResult = await db
