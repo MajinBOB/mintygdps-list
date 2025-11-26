@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { isUnauthorizedError } from "@/lib/authUtils";
@@ -23,30 +23,10 @@ export default function SubmitRecord() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [selectedListType, setSelectedListType] = useState<string>("demonlist");
-  const [searchQuery, setSearchQuery] = useState<string>("");
 
-  const { data: allDemons } = useQuery<Demon[]>({
+  const { data: demons } = useQuery<Demon[]>({
     queryKey: ["/api/demons"],
   });
-
-  // Filter demons by selected list type and search query
-  const demons = useMemo(() => {
-    if (!allDemons) return [];
-    let filtered = allDemons
-      .filter((d) => d.listType === selectedListType)
-      .sort((a, b) => a.position - b.position);
-
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter((d) =>
-        d.name.toLowerCase().includes(query) ||
-        d.position.toString().includes(query) ||
-        d.creator.toLowerCase().includes(query)
-      );
-    }
-
-    return filtered;
-  }, [allDemons, selectedListType, searchQuery]);
 
   const form = useForm<z.infer<typeof insertRecordSchema>>({
     resolver: zodResolver(insertRecordSchema),
@@ -146,8 +126,7 @@ export default function SubmitRecord() {
                       <FormLabel>List Type</FormLabel>
                       <Select value={selectedListType} onValueChange={(value) => {
                         setSelectedListType(value);
-                        setSearchQuery(""); // Reset search when list type changes
-                        form.setValue("demonId", ""); // Reset demon selection when list type changes
+                        form.setValue("demonId", "");
                       }}>
                         <FormControl>
                           <SelectTrigger data-testid="select-list-type">
@@ -166,41 +145,29 @@ export default function SubmitRecord() {
                     <FormField
                       control={form.control}
                       name="demonId"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Demon</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="Search by name, position, or creator..."
-                              value={searchQuery}
-                              onChange={(e) => setSearchQuery(e.target.value)}
-                              data-testid="input-search-demon"
-                              className="mb-2"
-                            />
-                          </FormControl>
-                          <Select onValueChange={field.onChange} value={field.value}>
-                            <FormControl>
-                              <SelectTrigger data-testid="select-demon">
-                                <SelectValue placeholder="Select a demon" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {demons && demons.length > 0 ? (
-                                demons.map((demon) => (
+                      render={({ field }) => {
+                        const filteredDemons = demons?.filter((d) => d.listType === selectedListType).sort((a, b) => a.position - b.position) || [];
+                        return (
+                          <FormItem>
+                            <FormLabel>Demon</FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <FormControl>
+                                <SelectTrigger data-testid="select-demon">
+                                  <SelectValue placeholder="Select a demon" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {filteredDemons.map((demon) => (
                                   <SelectItem key={demon.id} value={demon.id}>
                                     #{demon.position} - {demon.name}
                                   </SelectItem>
-                                ))
-                              ) : (
-                                <SelectItem value="no-results" disabled>
-                                  No levels found
-                                </SelectItem>
-                              )}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        );
+                      }}
                     />
 
                     <FormField
