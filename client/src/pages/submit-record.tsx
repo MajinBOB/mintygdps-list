@@ -163,24 +163,21 @@ export default function SubmitRecord() {
                       </Select>
                     </FormItem>
 
-                    <FormItem>
-                      <FormLabel>Search Level</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Search by name, position, or creator..."
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          data-testid="input-search-demon"
-                        />
-                      </FormControl>
-                    </FormItem>
-
                     <FormField
                       control={form.control}
                       name="demonId"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Demon</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="Search by name, position, or creator..."
+                              value={searchQuery}
+                              onChange={(e) => setSearchQuery(e.target.value)}
+                              data-testid="input-search-demon"
+                              className="mb-2"
+                            />
+                          </FormControl>
                           <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl>
                               <SelectTrigger data-testid="select-demon">
