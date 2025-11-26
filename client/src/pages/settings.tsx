@@ -85,13 +85,6 @@ export default function Settings() {
                   </p>
                 </div>
                 
-                <div>
-                  <label className="text-sm font-medium">Name</label>
-                  <p className="text-muted-foreground mt-1" data-testid="text-settings-name">
-                    {user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : 'Not set'}
-                  </p>
-                </div>
-
                 <Form {...form}>
                   <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                     <FormField

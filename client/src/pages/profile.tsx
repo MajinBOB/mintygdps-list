@@ -61,11 +61,6 @@ export default function Profile() {
                   <h1 className="font-display font-bold text-3xl mb-2" data-testid="text-profile-name">
                     {user.username}
                   </h1>
-                  {user.firstName && user.lastName && (
-                    <p className="text-muted-foreground mb-4" data-testid="text-profile-email">
-                      {user.firstName} {user.lastName}
-                    </p>
-                  )}
                   
                   <div className="grid grid-cols-3 gap-4">
                     <div className="text-center">

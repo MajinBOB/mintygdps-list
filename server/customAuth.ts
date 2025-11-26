@@ -13,8 +13,6 @@ const loginSchema = z.object({
 const signupSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters").max(30),
   password: z.string().min(8, "Password must be at least 8 characters"),
-  firstName: z.string().optional(),
-  lastName: z.string().optional(),
 });
 
 export async function setupCustomAuth(app: Express) {
@@ -43,8 +41,6 @@ export async function setupCustomAuth(app: Express) {
       req.session.user = {
         claims: { sub: user.id },
         username: user.username,
-        firstName: user.firstName,
-        lastName: user.lastName,
         isAdmin: user.isAdmin,
         isModerator: user.isModerator,
       };
@@ -66,7 +62,7 @@ export async function setupCustomAuth(app: Express) {
         return res.status(400).json({ message: error.toString() });
       }
 
-      const { username, password, firstName, lastName } = validation.data;
+      const { username, password } = validation.data;
 
       // Check if username already exists
       const existingUser = await storage.getUserByUsername(username);
@@ -81,16 +77,12 @@ export async function setupCustomAuth(app: Express) {
       const user = await storage.upsertUser({
         username,
         passwordHash,
-        firstName,
-        lastName,
       });
 
       // Set session with user data
       req.session.user = {
         claims: { sub: user.id },
         username: user.username,
-        firstName: user.firstName,
-        lastName: user.lastName,
         isAdmin: user.isAdmin,
         isModerator: user.isModerator,
       };
