@@ -1,10 +1,20 @@
 import { Link } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Trophy, Target, Users } from "lucide-react";
+import { Trophy, Target, Users, Zap } from "lucide-react";
+
+type Stats = {
+  totalDemons: number;
+  verifiedRecords: number;
+  activePlayers: number;
+};
 
 export default function Home() {
+  const { data: stats } = useQuery<Stats>({
+    queryKey: ["/api/stats"],
+  });
   const lists = [
     { 
       value: "demonlist", 
@@ -49,6 +59,31 @@ export default function Home() {
                 <p className="text-xl text-muted-foreground">
                   Select a list to view demons and submit your completions
                 </p>
+              </div>
+
+              {/* Stats */}
+              <div className="grid grid-cols-3 gap-4 mt-8">
+                <Card className="p-6 text-center">
+                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-primary/10 mb-3">
+                    <Zap className="h-6 w-6 text-primary" />
+                  </div>
+                  <p className="text-3xl font-bold text-primary">{stats?.totalDemons || 0}</p>
+                  <p className="text-sm text-muted-foreground">Total Demons</p>
+                </Card>
+                <Card className="p-6 text-center">
+                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-accent/10 mb-3">
+                    <Trophy className="h-6 w-6 text-accent" />
+                  </div>
+                  <p className="text-3xl font-bold text-accent">{stats?.verifiedRecords || 0}</p>
+                  <p className="text-sm text-muted-foreground">Verified Records</p>
+                </Card>
+                <Card className="p-6 text-center">
+                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-primary/10 mb-3">
+                    <Users className="h-6 w-6 text-primary" />
+                  </div>
+                  <p className="text-3xl font-bold text-primary">{stats?.activePlayers || 0}</p>
+                  <p className="text-sm text-muted-foreground">Active Players</p>
+                </Card>
               </div>
             </section>
 

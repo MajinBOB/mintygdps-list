@@ -42,6 +42,9 @@ export interface IStorage {
   
   // Player detail operations
   getPlayerDetails(userId: string): Promise<any>;
+  
+  // Stats operations
+  getStats(): Promise<any>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -407,6 +410,48 @@ export class DatabaseStorage implements IStorage {
       completionPoints,
       verifierPoints,
       totalPoints,
+    };
+  }
+
+  async getStats(): Promise<any> {
+    // Total demons in all lists
+    const totalDemonsResult = await db
+      .select({
+        count: sql<number>`COUNT(${demons.id})`,
+      })
+      .from(demons);
+
+    const totalDemons = totalDemonsResult[0]?.count || 0;
+
+    // Total completed levels + verified levels combined
+    const completedResult = await db
+      .select({
+        count: sql<number>`COUNT(${records.id})`,
+      })
+      .from(records)
+      .where(eq(records.status, "approved"));
+
+    const verifiedResult = await db
+      .select({
+        count: sql<number>`COUNT(${demons.id})`,
+      })
+      .from(demons);
+
+    const completed = completedResult[0]?.count || 0;
+    const verified = verifiedResult[0]?.count || 0;
+    const verifiedRecords = completed + verified;
+
+    // Active players (accounts in database)
+    const activePlayers = await db
+      .select({
+        count: sql<number>`COUNT(${users.id})`,
+      })
+      .from(users);
+
+    return {
+      totalDemons,
+      verifiedRecords,
+      activePlayers: activePlayers[0]?.count || 0,
     };
   }
 }

@@ -72,6 +72,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get stats
+  app.get("/api/stats", async (req, res) => {
+    try {
+      const stats = await storage.getStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching stats:", error);
+      res.status(500).json({ message: "Failed to fetch stats" });
+    }
+  });
+
   // Get a specific demon by ID
   app.get("/api/demons/:id", async (req, res) => {
     try {
