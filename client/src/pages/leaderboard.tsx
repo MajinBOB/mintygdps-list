@@ -1,10 +1,12 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Navbar } from "@/components/Navbar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Trophy } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Trophy, Search } from "lucide-react";
 
 const LISTS = [
   { id: "demonlist", name: "Demonlist", description: "Main ranked list" },
@@ -15,9 +17,14 @@ const LISTS = [
 
 export default function Leaderboard() {
   const [, navigate] = useLocation();
+  const [searchQuery, setSearchQuery] = useState("");
   const { data: overall, isLoading } = useQuery<any[]>({
     queryKey: ["/api/leaderboard"],
   });
+
+  const filteredLeaderboard = overall?.filter(entry =>
+    entry.user.username.toLowerCase().includes(searchQuery.toLowerCase())
+  ) || [];
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -80,6 +87,19 @@ export default function Leaderboard() {
                 </p>
               </div>
 
+              {/* Search Bar */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Search players..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                  data-testid="input-search-overall"
+                />
+              </div>
+
               {isLoading ? (
                 <div className="space-y-4">
                   {[...Array(5)].map((_, i) => (
@@ -92,9 +112,15 @@ export default function Leaderboard() {
                     No players yet. Be the first to submit a record!
                   </p>
                 </div>
+              ) : filteredLeaderboard.length === 0 ? (
+                <div className="text-center py-12 bg-card rounded-lg">
+                  <p className="text-muted-foreground">
+                    No players found matching "{searchQuery}"
+                  </p>
+                </div>
               ) : (
                 <div className="space-y-2">
-                  {overall.slice(0, 5).map((entry, index) => (
+                  {filteredLeaderboard.map((entry, index) => (
                     <div
                       key={entry.user.id}
                       className="flex items-center gap-4 p-4 rounded-lg bg-card hover-elevate cursor-pointer"

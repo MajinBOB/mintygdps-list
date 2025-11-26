@@ -1,8 +1,11 @@
+import { useState } from "react";
 import { useParams } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Navbar } from "@/components/Navbar";
 import { LeaderboardTable } from "@/components/LeaderboardTable";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
 
 const LIST_NAMES: Record<string, string> = {
   demonlist: "Demonlist",
@@ -13,6 +16,7 @@ const LIST_NAMES: Record<string, string> = {
 
 export default function LeaderboardList() {
   const { listType } = useParams<{ listType: string }>();
+  const [searchQuery, setSearchQuery] = useState("");
   
   const { data: leaderboard, isLoading } = useQuery<any[]>({
     queryKey: ["/api/leaderboard", listType],
@@ -26,6 +30,10 @@ export default function LeaderboardList() {
 
   const displayName = LIST_NAMES[listType || ""] || listType;
 
+  const filteredLeaderboard = leaderboard?.filter(entry =>
+    entry.user.username.toLowerCase().includes(searchQuery.toLowerCase())
+  ) || [];
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -35,13 +43,28 @@ export default function LeaderboardList() {
         <div className="container mx-auto px-6">
           <div className="max-w-4xl mx-auto space-y-8">
             {/* Page Header */}
-            <div>
-              <h1 className="font-display font-bold text-4xl md:text-5xl mb-2">
-                {displayName} Leaderboard
-              </h1>
-              <p className="text-muted-foreground text-lg">
-                Top players ranked by points earned from {displayName.toLowerCase()} completions
-              </p>
+            <div className="space-y-4">
+              <div>
+                <h1 className="font-display font-bold text-4xl md:text-5xl mb-2">
+                  {displayName} Leaderboard
+                </h1>
+                <p className="text-muted-foreground text-lg">
+                  Top players ranked by points earned from {displayName.toLowerCase()} completions
+                </p>
+              </div>
+
+              {/* Search Bar */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Search players..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                  data-testid={`input-search-${listType}`}
+                />
+              </div>
             </div>
 
             {/* Leaderboard */}
@@ -57,8 +80,14 @@ export default function LeaderboardList() {
                   No players yet on this leaderboard. Be the first to submit a record!
                 </p>
               </div>
+            ) : filteredLeaderboard.length === 0 ? (
+              <div className="text-center py-16">
+                <p className="text-muted-foreground text-lg">
+                  No players found matching "{searchQuery}"
+                </p>
+              </div>
             ) : (
-              <LeaderboardTable entries={leaderboard} />
+              <LeaderboardTable entries={filteredLeaderboard} />
             )}
           </div>
         </div>
