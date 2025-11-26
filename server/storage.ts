@@ -3,12 +3,16 @@ import {
   users,
   demons,
   records,
+  packs,
+  packLevels,
   type User,
   type UpsertUser,
   type Demon,
   type InsertDemon,
   type Record,
   type InsertRecord,
+  type Pack,
+  type InsertPack,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql, and } from "drizzle-orm";
@@ -49,6 +53,16 @@ export interface IStorage {
 
   // Moderators operations
   getModerators(): Promise<User[]>;
+
+  // Pack operations
+  getAllPacks(listType?: string): Promise<any[]>;
+  getPack(id: string): Promise<any>;
+  createPack(pack: InsertPack): Promise<Pack>;
+  updatePack(id: string, pack: Partial<InsertPack>): Promise<Pack>;
+  deletePack(id: string): Promise<void>;
+  addLevelToPack(packId: string, demonId: string): Promise<void>;
+  removeLevelFromPack(packId: string, demonId: string): Promise<void>;
+  getPacksByUser(userId: string): Promise<any[]>;
 }
 
 export class DatabaseStorage implements IStorage {
