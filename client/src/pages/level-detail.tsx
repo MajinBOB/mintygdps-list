@@ -4,7 +4,8 @@ import { Navbar } from "@/components/Navbar";
 import { DifficultyBadge } from "@/components/DifficultyBadge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, User, Trophy, Star } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { ArrowLeft, User, Trophy, Star, Heart } from "lucide-react";
 import { Link } from "wouter";
 import { extractYouTubeId } from "@/lib/pointSystem";
 import type { Demon, Record } from "@shared/schema";
@@ -180,6 +181,37 @@ export default function LevelDetail() {
                     </CardHeader>
                     <CardContent>
                       <p className="text-sm">{demon.verifier}</p>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {demon.enjoymentRating && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-sm font-medium text-muted-foreground">Enjoyment Rating</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center gap-2">
+                        <Heart className="h-4 w-4 text-red-500 fill-red-500" />
+                        <span className="font-display font-bold text-lg">{demon.enjoymentRating}/5</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {demon.categories && demon.categories.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Categories</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex flex-wrap gap-2">
+                        {demon.categories.map((category, index) => (
+                          <Badge key={index} variant="secondary" data-testid={`badge-category-${index}`}>
+                            {category}
+                          </Badge>
+                        ))}
+                      </div>
                     </CardContent>
                   </Card>
                 )}

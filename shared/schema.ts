@@ -64,6 +64,8 @@ export const demons = pgTable("demons", {
   videoUrl: text("video_url"),
   completionCount: integer("completion_count").notNull().default(0),
   listType: varchar("list_type", { length: 50 }).notNull().default("demonlist"), // demonlist, challenge, unrated, upcoming
+  enjoymentRating: integer("enjoyment_rating"),
+  categories: text("categories").array().default(sql`ARRAY[]::text[]`),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -78,6 +80,8 @@ export const insertDemonSchema = createInsertSchema(demons).omit({
   position: z.number().int().positive(),
   points: z.number().int().positive(),
   listType: z.enum(["demonlist", "challenge", "unrated", "upcoming", "platformer"]).default("demonlist"),
+  enjoymentRating: z.number().int().min(1).max(5).optional(),
+  categories: z.array(z.string()).optional().default([]),
 });
 
 export type InsertDemon = z.infer<typeof insertDemonSchema>;

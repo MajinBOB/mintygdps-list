@@ -138,6 +138,8 @@ export default function AdminDemons() {
       points: 100,
       videoUrl: "",
       listType: "demonlist",
+      enjoymentRating: undefined,
+      categories: [],
     },
   });
 
@@ -247,6 +249,8 @@ export default function AdminDemons() {
       points: demon.points,
       videoUrl: demon.videoUrl || "",
       listType: demon.listType as any,
+      enjoymentRating: demon.enjoymentRating || undefined,
+      categories: demon.categories || [],
     });
     setIsDialogOpen(true);
   };
@@ -488,6 +492,104 @@ export default function AdminDemons() {
                               <FormControl>
                                 <Input placeholder="https://youtube.com/..." {...field} value={field.value ?? ""} data-testid="input-demon-video-url" />
                               </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="enjoymentRating"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Enjoyment Rating (Optional)</FormLabel>
+                              <Select onValueChange={(value) => field.onChange(value ? parseInt(value) : undefined)} value={field.value ? String(field.value) : ""}>
+                                <FormControl>
+                                  <SelectTrigger data-testid="select-enjoyment-rating">
+                                    <SelectValue placeholder="Select rating (1-5)" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="1">1 - Not Enjoyable</SelectItem>
+                                  <SelectItem value="2">2 - Slightly Enjoyable</SelectItem>
+                                  <SelectItem value="3">3 - Moderately Enjoyable</SelectItem>
+                                  <SelectItem value="4">4 - Very Enjoyable</SelectItem>
+                                  <SelectItem value="5">5 - Extremely Enjoyable</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="categories"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Categories (Optional)</FormLabel>
+                              <div className="space-y-2">
+                                {field.value && field.value.length > 0 && (
+                                  <div className="space-y-2">
+                                    {field.value.map((category, index) => (
+                                      <div key={index} className="flex items-center gap-2">
+                                        <Input
+                                          value={category}
+                                          disabled
+                                          className="flex-1"
+                                          data-testid={`input-category-${index}`}
+                                        />
+                                        <Button
+                                          type="button"
+                                          variant="outline"
+                                          size="sm"
+                                          onClick={() => {
+                                            const newCategories = field.value.filter((_, i) => i !== index);
+                                            field.onChange(newCategories);
+                                          }}
+                                          data-testid={`button-remove-category-${index}`}
+                                        >
+                                          −
+                                        </Button>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                                <div className="flex gap-2">
+                                  <Input
+                                    id="new-category-input"
+                                    placeholder="Type a category..."
+                                    onKeyDown={(e) => {
+                                      if (e.key === "Enter") {
+                                        e.preventDefault();
+                                        const input = e.currentTarget as HTMLInputElement;
+                                        const value = input.value.trim();
+                                        if (value) {
+                                          field.onChange([...(field.value || []), value]);
+                                          input.value = "";
+                                        }
+                                      }
+                                    }}
+                                    data-testid="input-new-category"
+                                  />
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                      const input = document.getElementById("new-category-input") as HTMLInputElement;
+                                      const value = input?.value.trim();
+                                      if (value) {
+                                        field.onChange([...(field.value || []), value]);
+                                        if (input) input.value = "";
+                                      }
+                                    }}
+                                    data-testid="button-add-category"
+                                  >
+                                    +
+                                  </Button>
+                                </div>
+                              </div>
                               <FormMessage />
                             </FormItem>
                           )}
