@@ -114,6 +114,44 @@ export type InsertRecord = z.infer<typeof insertRecordSchema>;
 export type Record = typeof records.$inferSelect;
 
 // ============================================================================
+// PACKS TABLES
+// ============================================================================
+
+// Packs table - stores challenge packs
+export const packs = pgTable("packs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  points: integer("points").notNull(),
+  listType: varchar("list_type", { length: 50 }).notNull(), // demonlist, challenge, unrated, upcoming, platformer
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertPackSchema = createInsertSchema(packs).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+}).extend({
+  name: z.string().min(1, "Pack name required"),
+  points: z.number().int().positive("Points must be positive"),
+  listType: z.enum(["demonlist", "challenge", "unrated", "upcoming", "platformer"]),
+});
+
+export type InsertPack = z.infer<typeof insertPackSchema>;
+export type Pack = typeof packs.$inferSelect;
+
+// Pack levels junction table
+export const packLevels = pgTable("pack_levels", {
+  packId: varchar("pack_id").notNull().references(() => packs.id, { onDelete: "cascade" }),
+  demonId: varchar("demon_id").notNull().references(() => demons.id, { onDelete: "cascade" }),
+}, (table) => [
+  index("IDX_pack_levels_pack").on(table.packId),
+  index("IDX_pack_levels_demon").on(table.demonId),
+]);
+
+export type PackLevel = typeof packLevels.$inferSelect;
+
+// ============================================================================
 // RELATIONS
 // ============================================================================
 
@@ -123,6 +161,7 @@ export const usersRelations = relations(users, ({ many }) => ({
 
 export const demonsRelations = relations(demons, ({ many }) => ({
   records: many(records),
+  packLevels: many(packLevels),
 }));
 
 export const recordsRelations = relations(records, ({ one }) => ({
@@ -137,5 +176,20 @@ export const recordsRelations = relations(records, ({ one }) => ({
   reviewer: one(users, {
     fields: [records.reviewedBy],
     references: [users.id],
+  }),
+}));
+
+export const packsRelations = relations(packs, ({ many }) => ({
+  levels: many(packLevels),
+}));
+
+export const packLevelsRelations = relations(packLevels, ({ one }) => ({
+  pack: one(packs, {
+    fields: [packLevels.packId],
+    references: [packs.id],
+  }),
+  demon: one(demons, {
+    fields: [packLevels.demonId],
+    references: [demons.id],
   }),
 }));
