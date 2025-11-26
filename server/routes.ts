@@ -2,7 +2,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupSessionAuth, isAuthenticated, isAdmin } from "./sessionAuth";
+import { setupSessionAuth, isAuthenticated, isAdmin, isModerator } from "./sessionAuth";
 import { setupCustomAuth } from "./customAuth";
 import { insertDemonSchema, insertRecordSchema } from "@shared/schema";
 import { fromError } from "zod-validation-error";
@@ -234,8 +234,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Reorder demons and recalculate points (admin only)
-  app.post("/api/admin/demons/reorder", isAuthenticated, isAdmin, async (req: any, res) => {
+  // Reorder demons and recalculate points (admin or moderator)
+  app.post("/api/admin/demons/reorder", isAuthenticated, isModerator, async (req: any, res) => {
     try {
       const { demons: demonOrder, listType } = req.body;
       

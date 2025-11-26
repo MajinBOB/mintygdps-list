@@ -52,3 +52,10 @@ export function isAdmin(req: any, res: any, next: any) {
   }
   res.status(403).json({ message: "Forbidden" });
 }
+
+export function isModerator(req: any, res: any, next: any) {
+  if (req.user?.isAdmin || req.user?.isModerator) {
+    return next();
+  }
+  res.status(403).json({ message: "Forbidden" });
+}

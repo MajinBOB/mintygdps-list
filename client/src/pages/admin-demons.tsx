@@ -121,7 +121,7 @@ export default function AdminDemons() {
   }, [allDemons, selectedListType]);
 
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationDistance: 8 }),
+    useSensor(PointerSensor, { distance: 8 }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
@@ -407,7 +407,7 @@ export default function AdminDemons() {
                             <FormItem>
                               <FormLabel>Verifier (Optional)</FormLabel>
                               <FormControl>
-                                <Input placeholder="Verifier name" {...field} data-testid="input-demon-verifier" />
+                                <Input placeholder="Verifier name" {...field} value={field.value ?? ""} data-testid="input-demon-verifier" />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -484,7 +484,7 @@ export default function AdminDemons() {
                             <FormItem>
                               <FormLabel>Video URL (Optional)</FormLabel>
                               <FormControl>
-                                <Input placeholder="https://youtube.com/..." {...field} data-testid="input-demon-video-url" />
+                                <Input placeholder="https://youtube.com/..." {...field} value={field.value ?? ""} data-testid="input-demon-video-url" />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
