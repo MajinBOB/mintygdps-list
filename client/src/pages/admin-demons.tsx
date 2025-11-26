@@ -289,6 +289,7 @@ export default function AdminDemons() {
     challenge: "Challenge List",
     unrated: "Unrated List",
     upcoming: "Upcoming List",
+    platformer: "Platformer List",
   };
 
   return (
