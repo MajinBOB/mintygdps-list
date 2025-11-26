@@ -5,22 +5,41 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut } from "lucide-react";
-import { useState } from "react";
+import { LogOut, Upload } from "lucide-react";
+import { useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { COUNTRIES, getCountryFlag, getCountryName } from "@/lib/countries";
+import { getInitials } from "@/lib/initials";
 
 const usernameSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters").max(30, "Username must be less than 30 characters"),
 });
 
+const settingsSchema = z.object({
+  profileImageUrl: z.string().optional(),
+  country: z.string().optional(),
+});
+
 type UsernameFormData = z.infer<typeof usernameSchema>;
+type SettingsFormData = z.infer<typeof settingsSchema>;
 
 export default function Settings() {
   const { user, isLoading } = useAuth();
-  const [isUpdating, setIsUpdating] = useState(false);
+  const [isUpdatingUsername, setIsUpdatingUsername] = useState(false);
+  const [isUpdatingSettings, setIsUpdatingSettings] = useState(false);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   const form = useForm<UsernameFormData>({
@@ -30,8 +49,16 @@ export default function Settings() {
     },
   });
 
+  const settingsForm = useForm<SettingsFormData>({
+    resolver: zodResolver(settingsSchema),
+    defaultValues: {
+      profileImageUrl: user?.profileImageUrl || "",
+      country: user?.country || "",
+    },
+  });
+
   const onSubmit = async (data: UsernameFormData) => {
-    setIsUpdating(true);
+    setIsUpdatingUsername(true);
     try {
       await apiRequest("PATCH", "/api/auth/profile", data);
       toast({
@@ -46,7 +73,41 @@ export default function Settings() {
         variant: "destructive",
       });
     } finally {
-      setIsUpdating(false);
+      setIsUpdatingUsername(false);
+    }
+  };
+
+  const onSettingsSubmit = async (data: SettingsFormData) => {
+    setIsUpdatingSettings(true);
+    try {
+      await apiRequest("PATCH", "/api/auth/settings", data);
+      toast({
+        title: "Success",
+        description: "Profile settings updated successfully!",
+      });
+      setPreviewImage(null);
+      await queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update settings",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpdatingSettings(false);
+    }
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const result = reader.result as string;
+        setPreviewImage(result);
+        settingsForm.setValue("profileImageUrl", result);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -108,22 +169,104 @@ export default function Settings() {
                         </FormItem>
                       )}
                     />
-                    <Button type="submit" disabled={isUpdating} data-testid="button-update-username">
-                      {isUpdating ? "Updating..." : "Update Username"}
+                    <Button type="submit" disabled={isUpdatingUsername} data-testid="button-update-username">
+                      {isUpdatingUsername ? "Updating..." : "Update Username"}
                     </Button>
                   </form>
                 </Form>
 
-                <div className="pt-4 border-t">
-                  <p className="text-sm font-medium mb-4">Danger Zone</p>
-                  <Button variant="destructive" asChild data-testid="button-logout">
-                    <a href="/logout" className="flex items-center gap-2">
-                      <LogOut className="h-4 w-4" />
-                      Log Out
-                    </a>
-                  </Button>
-                </div>
               </div>
+            </Card>
+
+            {/* Profile Settings */}
+            <Card className="p-8">
+              <h2 className="font-display font-bold text-2xl mb-6">Profile Settings</h2>
+              
+              <Form {...settingsForm}>
+                <form onSubmit={settingsForm.handleSubmit(onSettingsSubmit)} className="space-y-6">
+                  {/* Profile Picture */}
+                  <div className="space-y-4">
+                    <FormLabel>Profile Picture</FormLabel>
+                    <div className="flex items-center gap-6">
+                      <Avatar className="h-24 w-24">
+                        <AvatarImage src={previewImage || user?.profileImageUrl || undefined} className="object-cover" />
+                        <AvatarFallback>{getInitials(user)}</AvatarFallback>
+                      </Avatar>
+                      <div className="space-y-2">
+                        <input
+                          type="file"
+                          ref={fileInputRef}
+                          onChange={handleImageUpload}
+                          accept="image/*"
+                          className="hidden"
+                          data-testid="input-profile-image"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="flex items-center gap-2"
+                          data-testid="button-upload-image"
+                        >
+                          <Upload className="h-4 w-4" />
+                          Upload Picture
+                        </Button>
+                        {previewImage && (
+                          <p className="text-xs text-muted-foreground">
+                            New image selected - save to apply
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Country Selection */}
+                  <FormField
+                    control={settingsForm.control}
+                    name="country"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Country (Optional)</FormLabel>
+                        <Select value={field.value || ""} onValueChange={field.onChange}>
+                          <FormControl>
+                            <SelectTrigger data-testid="select-country">
+                              <SelectValue placeholder="Select a country..." />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="">None</SelectItem>
+                            {COUNTRIES.map((country) => (
+                              <SelectItem key={country.code} value={country.code} data-testid={`option-country-${country.code}`}>
+                                <span>{getCountryFlag(country.code)}</span>
+                                <span className="ml-2">{country.name}</span>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <p className="text-xs text-muted-foreground mt-2">
+                          Your country will be displayed on your leaderboard profile
+                        </p>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <Button type="submit" disabled={isUpdatingSettings} data-testid="button-update-settings">
+                    {isUpdatingSettings ? "Saving..." : "Save Settings"}
+                  </Button>
+                </form>
+              </Form>
+            </Card>
+
+            {/* Danger Zone */}
+            <Card className="p-8 border-destructive/50">
+              <h2 className="font-display font-bold text-2xl mb-6">Danger Zone</h2>
+              <Button variant="destructive" asChild data-testid="button-logout">
+                <a href="/logout" className="flex items-center gap-2">
+                  <LogOut className="h-4 w-4" />
+                  Log Out
+                </a>
+              </Button>
             </Card>
           </div>
         </div>

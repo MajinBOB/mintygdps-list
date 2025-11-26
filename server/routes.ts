@@ -56,6 +56,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch('/api/auth/settings', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { profileImageUrl, country } = req.body;
+
+      const user = await storage.updateUserSettings(userId, profileImageUrl, country);
+      res.json(user);
+    } catch (error: any) {
+      console.error("Error updating settings:", error);
+      res.status(500).json({ message: "Failed to update settings" });
+    }
+  });
+
   // ============================================================================
   // PUBLIC ROUTES (No auth required)
   // ============================================================================

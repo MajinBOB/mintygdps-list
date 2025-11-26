@@ -19,6 +19,7 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
   updateUserProfile(userId: string, username: string): Promise<User>;
+  updateUserSettings(userId: string, profileImageUrl?: string, country?: string): Promise<User>;
   getAllUsers(): Promise<User[]>;
 
   // Demon operations
@@ -82,6 +83,19 @@ export class DatabaseStorage implements IStorage {
     const [user] = await db
       .update(users)
       .set({ username, updatedAt: new Date() })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
+  }
+
+  async updateUserSettings(userId: string, profileImageUrl?: string, country?: string): Promise<User> {
+    const updates: any = { updatedAt: new Date() };
+    if (profileImageUrl !== undefined) updates.profileImageUrl = profileImageUrl || null;
+    if (country !== undefined) updates.country = country || null;
+
+    const [user] = await db
+      .update(users)
+      .set(updates)
       .where(eq(users.id, userId))
       .returning();
     return user;
@@ -345,6 +359,7 @@ export class DatabaseStorage implements IStorage {
           id: user.id,
           username: user.username,
           profileImageUrl: user.profileImageUrl,
+          country: user.country,
         },
         completionPoints,
         verifierPoints,
@@ -404,6 +419,7 @@ export class DatabaseStorage implements IStorage {
         id: user.id,
         username: user.username,
         profileImageUrl: user.profileImageUrl,
+        country: user.country,
       },
       completedLevels: completedRecords.map(r => r.demon).filter(Boolean),
       verifiedLevels: verifiedDemons,
