@@ -19,7 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { COUNTRIES, getCountryFlag, getCountryName } from "@/lib/countries";
+import { COUNTRIES, CountryFlag, getCountryName } from "@/lib/countries";
 import { getInitials } from "@/lib/initials";
 
 const usernameSchema = z.object({
@@ -241,8 +241,10 @@ export default function Settings() {
                             <SelectItem value="none">None</SelectItem>
                             {COUNTRIES.map((country) => (
                               <SelectItem key={country.code} value={country.code} data-testid={`option-country-${country.code}`}>
-                                <span>{getCountryFlag(country.code)}</span>
-                                <span className="ml-2">{country.name}</span>
+                                <div className="flex items-center gap-2">
+                                  <CountryFlag code={country.code} className="h-4 w-4" />
+                                  <span>{country.name}</span>
+                                </div>
                               </SelectItem>
                             ))}
                           </SelectContent>

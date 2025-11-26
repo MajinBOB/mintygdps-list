@@ -1,7 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Trophy } from "lucide-react";
 import { getInitials } from "@/lib/initials";
-import { getCountryFlag } from "@/lib/countries";
+import { CountryFlag } from "@/lib/countries";
 import { Link } from "wouter";
 import type { User } from "@shared/schema";
 
@@ -22,7 +22,6 @@ export function LeaderboardTable({ entries }: LeaderboardTableProps) {
       {entries.map((entry, index) => {
         const isTopThree = index < 3;
         const userInitials = getInitials(entry.user);
-        const countryFlag = getCountryFlag(entry.user.country);
         
         return (
           <Link key={entry.user.id} href={`/player/${entry.user.id}`}>
@@ -56,7 +55,7 @@ export function LeaderboardTable({ entries }: LeaderboardTableProps) {
                 <p className="font-semibold truncate" data-testid={`text-player-name-${index}`}>
                   {entry.user.username}
                 </p>
-                {countryFlag && <span className="text-lg" data-testid={`flag-country-${index}`}>{countryFlag}</span>}
+                {entry.user.country && <CountryFlag code={entry.user.country} className="h-5 w-5" />}
               </div>
               <p className="text-sm text-muted-foreground">
                 {entry.completions} completions

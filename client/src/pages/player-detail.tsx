@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ArrowLeft } from "lucide-react";
-import { getCountryFlag, getCountryName } from "@/lib/countries";
+import { CountryFlag, getCountryName } from "@/lib/countries";
 import { getInitials } from "@/lib/initials";
 import type { Demon } from "@shared/schema";
 
@@ -101,7 +101,7 @@ export default function PlayerDetail() {
                       {player.user.username}
                     </h1>
                     {player.user.country && (
-                      <div className="text-3xl" data-testid="flag-player-detail">{getCountryFlag(player.user.country)}</div>
+                      <CountryFlag code={player.user.country} className="h-12 w-12" data-testid="flag-player-detail" />
                     )}
                   </div>
                   {player.user.country && (

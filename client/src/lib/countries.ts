@@ -1,3 +1,6 @@
+import * as CountryFlags from 'country-flag-icons/react/3x2';
+import type { ComponentType, SVGProps } from 'react';
+
 export const COUNTRIES = [
   { code: 'US', name: 'United States' },
   { code: 'GB', name: 'United Kingdom' },
@@ -41,17 +44,12 @@ export const COUNTRIES = [
   { code: 'CL', name: 'Chile' },
 ];
 
-export function getCountryFlag(code?: string | null): string {
-  if (!code) return '';
+export function CountryFlag({ code, className, ...props }: { code?: string | null; className?: string; [key: string]: any }) {
+  if (!code) return null;
   const codeUpper = code.toUpperCase();
-  try {
-    const codePoints = codeUpper
-      .split('')
-      .map(char => 127397 + char.charCodeAt(0));
-    return String.fromCodePoint(...codePoints);
-  } catch {
-    return codeUpper;
-  }
+  const FlagComponent = (CountryFlags as Record<string, ComponentType<SVGProps<SVGSVGElement>>>)[codeUpper];
+  if (!FlagComponent) return null;
+  return <FlagComponent className={className || "h-5 w-5"} {...props} />;
 }
 
 export function getCountryName(code?: string | null): string {

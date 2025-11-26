@@ -8,7 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Trophy, Search } from "lucide-react";
-import { getCountryFlag } from "@/lib/countries";
+import { CountryFlag } from "@/lib/countries";
 import { getInitials } from "@/lib/initials";
 
 const LISTS = [
@@ -124,7 +124,6 @@ export default function Leaderboard() {
               ) : (
                 <div className="space-y-2">
                   {filteredLeaderboard.map((entry, index) => {
-                    const countryFlag = getCountryFlag(entry.user.country);
                     const userInitials = getInitials(entry.user);
                     return (
                     <div
@@ -143,7 +142,7 @@ export default function Leaderboard() {
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
                           <p className="font-semibold">{entry.user.username}</p>
-                          {countryFlag && <span className="text-lg" data-testid={`flag-overall-${index}`}>{countryFlag}</span>}
+                          {entry.user.country && <CountryFlag code={entry.user.country} className="h-5 w-5" />}
                         </div>
                         <p className="text-xs text-muted-foreground">
                           {entry.completions} completions
