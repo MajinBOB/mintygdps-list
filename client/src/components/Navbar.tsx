@@ -28,6 +28,11 @@ export function Navbar() {
               Leaderboard
             </a>
           </Link>
+          <Link href="/packs">
+            <a className="text-sm font-medium hover:text-primary transition-colors" data-testid="link-nav-packs">
+              Packs
+            </a>
+          </Link>
           {isAuthenticated && (
             <Link href="/submit">
               <a className="text-sm font-medium hover:text-primary transition-colors" data-testid="link-nav-submit">

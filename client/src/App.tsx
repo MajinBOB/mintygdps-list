@@ -25,6 +25,7 @@ import AdminDashboard from "@/pages/admin-dashboard";
 import AdminDemons from "@/pages/admin-demons";
 import AdminPacks from "@/pages/admin-packs";
 import AdminSubmissions from "@/pages/admin-submissions";
+import Packs from "@/pages/packs";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -49,6 +50,7 @@ function Router() {
       <Route path="/leaderboard" component={Leaderboard} />
       <Route path="/leaderboard/:listType" component={LeaderboardList} />
       <Route path="/player/:userId" component={PlayerDetail} />
+      <Route path="/packs" component={Packs} />
       <Route path="/submit/:id?" component={SubmitRecord} />
       <Route path="/login" component={Login} />
       <Route path="/signup" component={Signup} />
