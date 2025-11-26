@@ -46,6 +46,7 @@ export default function ListPage() {
     challenge: "Challenge List",
     unrated: "Unrated List",
     upcoming: "Upcoming List",
+    platformer: "Platformer List",
   };
 
   const currentListLabel = listLabels[listType] || "Demonlist";
@@ -68,12 +69,14 @@ export default function ListPage() {
                 </p>
               </div>
 
-              <Button asChild data-testid="button-submit-new">
-                <Link href="/submit">
-                  <PlusCircle className="h-4 w-4 mr-2" />
-                  Submit Record
-                </Link>
-              </Button>
+              {listType !== "unrated" && (
+                <Button asChild data-testid="button-submit-new">
+                  <Link href="/submit">
+                    <PlusCircle className="h-4 w-4 mr-2" />
+                    Submit Record
+                  </Link>
+                </Button>
+              )}
             </div>
 
             {/* Search and Filters */}

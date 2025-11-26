@@ -364,6 +364,7 @@ export default function AdminDemons() {
                                   <SelectItem value="challenge">Challenge List</SelectItem>
                                   <SelectItem value="unrated">Unrated List</SelectItem>
                                   <SelectItem value="upcoming">Upcoming List</SelectItem>
+                                  <SelectItem value="platformer">Platformer List</SelectItem>
                                 </SelectContent>
                               </Select>
                               <FormMessage />

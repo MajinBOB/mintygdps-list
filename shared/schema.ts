@@ -76,7 +76,7 @@ export const insertDemonSchema = createInsertSchema(demons).omit({
   difficulty: z.enum(["Easy", "Medium", "Hard", "Insane", "Extreme"]),
   position: z.number().int().positive(),
   points: z.number().int().positive(),
-  listType: z.enum(["demonlist", "challenge", "unrated", "upcoming"]).default("demonlist"),
+  listType: z.enum(["demonlist", "challenge", "unrated", "upcoming", "platformer"]).default("demonlist"),
 });
 
 export type InsertDemon = z.infer<typeof insertDemonSchema>;
