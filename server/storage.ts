@@ -170,8 +170,6 @@ export class DatabaseStorage implements IStorage {
         user: {
           id: users.id,
           username: users.username,
-          firstName: users.firstName,
-          lastName: users.lastName,
           profileImageUrl: users.profileImageUrl,
         },
         demon: {
@@ -211,8 +209,6 @@ export class DatabaseStorage implements IStorage {
         user: {
           id: users.id,
           username: users.username,
-          firstName: users.firstName,
-          lastName: users.lastName,
           profileImageUrl: users.profileImageUrl,
         },
       })
@@ -311,8 +307,6 @@ export class DatabaseStorage implements IStorage {
         user: {
           id: user.id,
           username: user.username,
-          firstName: user.firstName,
-          lastName: user.lastName,
           profileImageUrl: user.profileImageUrl,
         },
         completionPoints,

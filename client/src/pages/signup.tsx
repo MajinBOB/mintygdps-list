@@ -15,8 +15,6 @@ const signupSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters").max(30),
   password: z.string().min(8, "Password must be at least 8 characters"),
   confirmPassword: z.string(),
-  firstName: z.string().optional(),
-  lastName: z.string().optional(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
@@ -35,8 +33,6 @@ export default function Signup() {
       username: "",
       password: "",
       confirmPassword: "",
-      firstName: "",
-      lastName: "",
     },
   });
 
@@ -46,8 +42,6 @@ export default function Signup() {
       await apiRequest("POST", "/api/auth/signup", {
         username: data.username,
         password: data.password,
-        firstName: data.firstName || undefined,
-        lastName: data.lastName || undefined,
       });
       toast({
         title: "Success",
@@ -130,47 +124,6 @@ export default function Signup() {
                   </FormItem>
                 )}
               />
-
-              <div className="border-t pt-4">
-                <p className="text-xs text-muted-foreground mb-3">Optional - Display name (can be set later)</p>
-                <div className="grid grid-cols-2 gap-3">
-                  <FormField
-                    control={form.control}
-                    name="firstName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs">First Name</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="First"
-                            {...field}
-                            value={field.value || ""}
-                            data-testid="input-signup-first-name"
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="lastName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs">Last Name</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Last"
-                            {...field}
-                            value={field.value || ""}
-                            data-testid="input-signup-last-name"
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </div>
 
               <Button
                 type="submit"

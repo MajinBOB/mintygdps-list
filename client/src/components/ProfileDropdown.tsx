@@ -46,9 +46,6 @@ export function ProfileDropdown() {
             <p className="text-sm font-medium" data-testid="text-username">
               {user.username}
             </p>
-            {user.firstName && user.lastName && (
-              <p className="text-xs text-muted-foreground">{user.firstName} {user.lastName}</p>
-            )}
           </div>
         </div>
         <DropdownMenuSeparator />

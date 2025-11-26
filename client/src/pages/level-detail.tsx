@@ -203,7 +203,7 @@ export default function LevelDetail() {
                             className="text-sm p-2 rounded bg-secondary/50"
                             data-testid={`victor-${index}`}
                           >
-                            <p className="font-medium">{record.user?.firstName} {record.user?.lastName}</p>
+                            <p className="font-medium">{record.user?.username}</p>
                             <p className="text-xs text-muted-foreground">
                               {new Date(record.submittedAt).toLocaleDateString()}
                             </p>
