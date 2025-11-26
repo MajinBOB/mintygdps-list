@@ -121,7 +121,7 @@ export default function AdminSubmissions() {
                   </TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="pending" className="space-y-4">
+                <TabsContent value="pending" className="space-y-6">
                   {recordsLoading ? (
                     <>
                       {[...Array(3)].map((_, i) => (
@@ -147,7 +147,7 @@ export default function AdminSubmissions() {
                   )}
                 </TabsContent>
 
-                <TabsContent value="approved" className="space-y-4">
+                <TabsContent value="approved" className="space-y-6">
                   {recordsLoading ? (
                     <>
                       {[...Array(3)].map((_, i) => (
@@ -167,7 +167,7 @@ export default function AdminSubmissions() {
                   )}
                 </TabsContent>
 
-                <TabsContent value="rejected" className="space-y-4">
+                <TabsContent value="rejected" className="space-y-6">
                   {recordsLoading ? (
                     <>
                       {[...Array(3)].map((_, i) => (
