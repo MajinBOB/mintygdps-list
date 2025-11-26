@@ -667,6 +667,7 @@ export class DatabaseStorage implements IStorage {
           return { ...pack, isCompleted: false, levels: [] };
         }
 
+        // Get user's completed levels (approved records)
         const userRecords = await db
           .select({ demonId: records.demonId })
           .from(records)
@@ -675,8 +676,18 @@ export class DatabaseStorage implements IStorage {
             eq(records.status, "approved")
           ));
 
+        // Get user's verified levels
+        const verifiedLevels = await db
+          .select({ id: demons.id })
+          .from(demons)
+          .where(eq(demons.verifierId, userId));
+
         const userCompletedDemonIds = new Set(userRecords.map(r => r.demonId));
-        const isCompleted = demonIds.every(id => userCompletedDemonIds.has(id));
+        const verifiedDemonIds = new Set(verifiedLevels.map(v => v.id));
+        
+        // Combine both completed and verified levels
+        const allUserCompletedIds = new Set([...userCompletedDemonIds, ...verifiedDemonIds]);
+        const isCompleted = demonIds.every(id => allUserCompletedIds.has(id));
 
         return { ...pack, isCompleted, levels: demonIds };
       })
