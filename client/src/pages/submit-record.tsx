@@ -23,6 +23,7 @@ export default function SubmitRecord() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [selectedListType, setSelectedListType] = useState<string>("demonlist");
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   const { data: demons } = useQuery<Demon[]>({
     queryKey: ["/api/demons"],
@@ -146,7 +147,17 @@ export default function SubmitRecord() {
                       control={form.control}
                       name="demonId"
                       render={({ field }) => {
-                        const filteredDemons = demons?.filter((d) => d.listType === selectedListType).sort((a, b) => a.position - b.position) || [];
+                        let filteredDemons = demons?.filter((d) => d.listType === selectedListType).sort((a, b) => a.position - b.position) || [];
+                        
+                        if (searchQuery.trim()) {
+                          const query = searchQuery.toLowerCase();
+                          filteredDemons = filteredDemons.filter((d) =>
+                            d.name.toLowerCase().includes(query) ||
+                            d.position.toString().includes(query) ||
+                            d.creator.toLowerCase().includes(query)
+                          );
+                        }
+
                         return (
                           <FormItem>
                             <FormLabel>Demon</FormLabel>
@@ -157,11 +168,26 @@ export default function SubmitRecord() {
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
-                                {filteredDemons.map((demon) => (
-                                  <SelectItem key={demon.id} value={demon.id}>
-                                    #{demon.position} - {demon.name}
-                                  </SelectItem>
-                                ))}
+                                <div className="p-2">
+                                  <Input
+                                    placeholder="Search by name, position, or creator..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    data-testid="input-search-demon"
+                                    className="mb-2"
+                                  />
+                                </div>
+                                {filteredDemons.length > 0 ? (
+                                  filteredDemons.map((demon) => (
+                                    <SelectItem key={demon.id} value={demon.id}>
+                                      #{demon.position} - {demon.name}
+                                    </SelectItem>
+                                  ))
+                                ) : (
+                                  <div className="p-2 text-sm text-muted-foreground">
+                                    No levels found
+                                  </div>
+                                )}
                               </SelectContent>
                             </Select>
                             <FormMessage />
