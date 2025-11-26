@@ -507,13 +507,15 @@ export class DatabaseStorage implements IStorage {
     
     // Calculate pack completion bonus points
     let packBonusPoints = 0;
+    let completedPacks: any[] = [];
     try {
       const userPacks = await this.getPacksByUser(userId);
-      const completedPacks = userPacks.filter(p => p.isCompleted);
+      completedPacks = userPacks.filter(p => p.isCompleted);
       packBonusPoints = completedPacks.reduce((sum, pack) => sum + pack.points, 0);
     } catch (error) {
       // Silently fail if packs feature not ready
       packBonusPoints = 0;
+      completedPacks = [];
     }
     
     const totalPoints = completionPoints + verifierPoints + packBonusPoints;

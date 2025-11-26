@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Navbar } from "@/components/Navbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/hooks/useAuth";
 import type { Pack } from "@shared/schema";
 
 const LIST_NAMES: Record<string, string> = {
@@ -25,6 +26,7 @@ interface PackWithLevels extends Pack {
 }
 
 export default function Packs() {
+  const { isAuthenticated } = useAuth();
   const [listType, setListType] = useState<string>("demonlist");
 
   const { data: packs, isLoading } = useQuery<PackWithLevels[]>({
@@ -35,6 +37,25 @@ export default function Packs() {
       return response.json();
     },
   });
+
+  const { data: playerDetails } = useQuery<any>({
+    queryKey: [`/api/players/current`],
+    queryFn: async () => {
+      const response = await fetch("/api/auth/user");
+      if (!response.ok) return null;
+      const user = await response.json();
+      if (!user?.id) return null;
+      const playerResponse = await fetch(`/api/players/${user.id}`);
+      if (!playerResponse.ok) return null;
+      return playerResponse.json();
+    },
+    enabled: isAuthenticated,
+  });
+
+  const completedLevelIds = useMemo(() => {
+    if (!playerDetails?.completedLevels) return new Set<string>();
+    return new Set(playerDetails.completedLevels.map((l: any) => l.id));
+  }, [playerDetails?.completedLevels]);
 
   const displayName = LIST_NAMES[listType] || listType;
 
@@ -125,25 +146,32 @@ export default function Packs() {
                             Levels
                           </p>
                           <div className="space-y-2 max-h-64 overflow-y-auto">
-                            {pack.levels.map((level, idx) => (
-                              <div
-                                key={level.id}
-                                className="flex items-center justify-between gap-3 p-2 rounded bg-card/50"
-                                data-testid={`level-${pack.id}-${level.id}`}
-                              >
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-sm font-medium truncate">
-                                    #{level.position} - {level.name}
-                                  </p>
-                                </div>
-                                <Badge
-                                  variant="secondary"
-                                  className={`flex-shrink-0 ${difficultyColors[level.difficulty] || "bg-gray-500/20"}`}
+                            {pack.levels.map((level, idx) => {
+                              const isCompleted = completedLevelIds.has(level.id);
+                              return (
+                                <div
+                                  key={level.id}
+                                  className={`flex items-center justify-between gap-3 p-2 rounded ${
+                                    isCompleted 
+                                      ? "bg-green-500/20 border border-green-500/50" 
+                                      : "bg-card/50"
+                                  }`}
+                                  data-testid={`level-${pack.id}-${level.id}`}
                                 >
-                                  {level.difficulty}
-                                </Badge>
-                              </div>
-                            ))}
+                                  <div className="flex-1 min-w-0">
+                                    <p className={`text-sm font-medium truncate ${isCompleted ? "line-through text-muted-foreground" : ""}`}>
+                                      #{level.position} - {level.name}
+                                    </p>
+                                  </div>
+                                  <Badge
+                                    variant="secondary"
+                                    className={`flex-shrink-0 ${difficultyColors[level.difficulty] || "bg-gray-500/20"}`}
+                                  >
+                                    {level.difficulty}
+                                  </Badge>
+                                </div>
+                              );
+                            })}
                           </div>
                         </div>
                       ) : (
