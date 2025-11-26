@@ -4,7 +4,10 @@ import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ArrowLeft } from "lucide-react";
+import { getCountryFlag, getCountryName } from "@/lib/countries";
+import { getInitials } from "@/lib/initials";
 import type { Demon } from "@shared/schema";
 
 type PlayerDetail = {
@@ -12,6 +15,7 @@ type PlayerDetail = {
     id: string;
     username: string;
     profileImageUrl?: string;
+    country?: string | null;
   };
   completedLevels: Demon[];
   verifiedLevels: Demon[];
@@ -85,11 +89,29 @@ export default function PlayerDetail() {
             </div>
 
             {/* Player Info */}
-            <div>
-              <h1 className="font-display font-bold text-4xl mb-2">
-                {player.user.username}
-              </h1>
-              <div className="grid grid-cols-3 gap-4 mt-6">
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                <Avatar className="h-20 w-20">
+                  <AvatarImage src={player.user.profileImageUrl || undefined} className="object-cover" />
+                  <AvatarFallback>{getInitials(player.user)}</AvatarFallback>
+                </Avatar>
+                <div>
+                  <div className="flex items-center gap-3">
+                    <h1 className="font-display font-bold text-4xl">
+                      {player.user.username}
+                    </h1>
+                    {player.user.country && (
+                      <div className="text-3xl" data-testid="flag-player-detail">{getCountryFlag(player.user.country)}</div>
+                    )}
+                  </div>
+                  {player.user.country && (
+                    <p className="text-muted-foreground text-sm mt-1" data-testid="text-player-country">
+                      {getCountryName(player.user.country)}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-4">
                 <Card className="p-4 text-center">
                   <p className="text-3xl font-bold text-primary">
                     {player.totalPoints}

@@ -1,11 +1,12 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Trophy } from "lucide-react";
 import { getInitials } from "@/lib/initials";
+import { getCountryFlag } from "@/lib/countries";
 import { Link } from "wouter";
 import type { User } from "@shared/schema";
 
 type LeaderboardEntry = {
-  user: User;
+  user: User & { country?: string | null };
   points: number;
   completions: number;
   rank: number;
@@ -21,6 +22,7 @@ export function LeaderboardTable({ entries }: LeaderboardTableProps) {
       {entries.map((entry, index) => {
         const isTopThree = index < 3;
         const userInitials = getInitials(entry.user);
+        const countryFlag = getCountryFlag(entry.user.country);
         
         return (
           <Link key={entry.user.id} href={`/player/${entry.user.id}`}>
@@ -50,9 +52,12 @@ export function LeaderboardTable({ entries }: LeaderboardTableProps) {
             </Avatar>
             
             <div className="flex-1 min-w-0">
-              <p className="font-semibold truncate" data-testid={`text-player-name-${index}`}>
-                {entry.user.username}
-              </p>
+              <div className="flex items-center gap-2">
+                <p className="font-semibold truncate" data-testid={`text-player-name-${index}`}>
+                  {entry.user.username}
+                </p>
+                {countryFlag && <span className="text-lg" data-testid={`flag-country-${index}`}>{countryFlag}</span>}
+              </div>
               <p className="text-sm text-muted-foreground">
                 {entry.completions} completions
               </p>

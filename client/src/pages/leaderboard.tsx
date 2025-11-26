@@ -6,7 +6,10 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Trophy, Search } from "lucide-react";
+import { getCountryFlag } from "@/lib/countries";
+import { getInitials } from "@/lib/initials";
 
 const LISTS = [
   { id: "demonlist", name: "Demonlist", description: "Main ranked list" },
@@ -120,7 +123,10 @@ export default function Leaderboard() {
                 </div>
               ) : (
                 <div className="space-y-2">
-                  {filteredLeaderboard.map((entry, index) => (
+                  {filteredLeaderboard.map((entry, index) => {
+                    const countryFlag = getCountryFlag(entry.user.country);
+                    const userInitials = getInitials(entry.user);
+                    return (
                     <div
                       key={entry.user.id}
                       className="flex items-center gap-4 p-4 rounded-lg bg-card hover-elevate cursor-pointer"
@@ -130,8 +136,15 @@ export default function Leaderboard() {
                       <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center font-display font-bold text-primary">
                         #{entry.rank}
                       </div>
+                      <Avatar className="h-10 w-10">
+                        <AvatarImage src={entry.user.profileImageUrl || undefined} className="object-cover" />
+                        <AvatarFallback>{userInitials}</AvatarFallback>
+                      </Avatar>
                       <div className="flex-1">
-                        <p className="font-semibold">{entry.user.username}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="font-semibold">{entry.user.username}</p>
+                          {countryFlag && <span className="text-lg" data-testid={`flag-overall-${index}`}>{countryFlag}</span>}
+                        </div>
                         <p className="text-xs text-muted-foreground">
                           {entry.completions} completions
                         </p>
@@ -143,7 +156,8 @@ export default function Leaderboard() {
                         <p className="text-xs text-muted-foreground">pts</p>
                       </div>
                     </div>
-                  ))}
+                  );
+                  })}
                 </div>
               )}
             </div>
