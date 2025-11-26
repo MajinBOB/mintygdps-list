@@ -38,7 +38,7 @@ export interface IStorage {
   rejectRecord(recordId: string, reviewerId: string): Promise<void>;
 
   // Leaderboard operations
-  getLeaderboard(): Promise<any[]>;
+  getLeaderboard(listType?: string): Promise<any[]>;
   
   // Player detail operations
   getPlayerDetails(userId: string): Promise<any>;
@@ -275,29 +275,58 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Leaderboard operations
-  async getLeaderboard(): Promise<any[]> {
+  async getLeaderboard(listType?: string): Promise<any[]> {
     // Get all users with their completion points and verifier points
     const allUsers = await db.select().from(users);
     
     const leaderboard = await Promise.all(allUsers.map(async (user) => {
       // Calculate completion points from approved records
-      const completionResult = await db
-        .select({
-          points: sql<number>`COALESCE(SUM(${demons.points}), 0)`,
-          completions: sql<number>`COUNT(${records.id})`,
-        })
-        .from(records)
-        .leftJoin(demons, eq(records.demonId, demons.id))
-        .where(and(eq(records.userId, user.id), eq(records.status, "approved")));
+      const completionResult = await (listType
+        ? db
+            .select({
+              points: sql<number>`COALESCE(SUM(${demons.points}), 0)`,
+              completions: sql<number>`COUNT(${records.id})`,
+            })
+            .from(records)
+            .leftJoin(demons, eq(records.demonId, demons.id))
+            .where(and(
+              eq(records.userId, user.id),
+              eq(records.status, "approved"),
+              eq(demons.listType, listType)
+            ))
+        : db
+            .select({
+              points: sql<number>`COALESCE(SUM(${demons.points}), 0)`,
+              completions: sql<number>`COUNT(${records.id})`,
+            })
+            .from(records)
+            .leftJoin(demons, eq(records.demonId, demons.id))
+            .where(and(
+              eq(records.userId, user.id),
+              eq(records.status, "approved")
+            ))
+      );
 
       // Calculate verifier points from demons they verified
-      const verifierResult = await db
-        .select({
-          verifierPoints: sql<number>`COALESCE(SUM(${demons.points}), 0)`,
-          verifiedCount: sql<number>`COUNT(${demons.id})`,
-        })
-        .from(demons)
-        .where(eq(demons.verifierId, user.id));
+      const verifierResult = await (listType
+        ? db
+            .select({
+              verifierPoints: sql<number>`COALESCE(SUM(${demons.points}), 0)`,
+              verifiedCount: sql<number>`COUNT(${demons.id})`,
+            })
+            .from(demons)
+            .where(and(
+              eq(demons.verifierId, user.id),
+              eq(demons.listType, listType)
+            ))
+        : db
+            .select({
+              verifierPoints: sql<number>`COALESCE(SUM(${demons.points}), 0)`,
+              verifiedCount: sql<number>`COUNT(${demons.id})`,
+            })
+            .from(demons)
+            .where(eq(demons.verifierId, user.id))
+      );
 
       const completionPoints = completionResult[0]?.points || 0;
       const completions = completionResult[0]?.completions || 0;

@@ -15,6 +15,7 @@ import List from "@/pages/list";
 import LevelDetail from "@/pages/level-detail";
 import Demonlist from "@/pages/demonlist";
 import Leaderboard from "@/pages/leaderboard";
+import LeaderboardList from "@/pages/leaderboard-list";
 import PlayerDetail from "@/pages/player-detail";
 import SubmitRecord from "@/pages/submit-record";
 import Login from "@/pages/login";
@@ -45,6 +46,7 @@ function Router() {
       <Route path="/level-detail/:id" component={LevelDetail} />
       <Route path="/demonlist" component={Demonlist} />
       <Route path="/leaderboard" component={Leaderboard} />
+      <Route path="/leaderboard/:listType" component={LeaderboardList} />
       <Route path="/player/:userId" component={PlayerDetail} />
       <Route path="/submit/:id?" component={SubmitRecord} />
       <Route path="/login" component={Login} />

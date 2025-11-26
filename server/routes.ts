@@ -114,10 +114,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get leaderboard
+  // Get leaderboard with optional list type filter
   app.get("/api/leaderboard", async (req, res) => {
     try {
-      const leaderboard = await storage.getLeaderboard();
+      const listType = req.query.listType as string | undefined;
+      const leaderboard = await storage.getLeaderboard(listType);
       res.json(leaderboard);
     } catch (error) {
       console.error("Error fetching leaderboard:", error);
