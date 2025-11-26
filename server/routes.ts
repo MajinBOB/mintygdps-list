@@ -195,7 +195,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: validationError.toString() });
       }
 
-      const demon = await storage.createDemon(validation.data);
+      let demonData = { ...validation.data };
+      
+      // If verifier name is provided, look up the user and set verifierId
+      if (validation.data.verifier && validation.data.verifier.trim()) {
+        const verifierUser = await storage.getUserByUsername(validation.data.verifier.trim());
+        if (verifierUser) {
+          demonData = { ...demonData, verifierId: verifierUser.id };
+        }
+      }
+
+      const demon = await storage.createDemon(demonData);
       res.json(demon);
     } catch (error: any) {
       console.error("Error creating demon:", error);
@@ -214,7 +224,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: validationError.toString() });
       }
 
-      const demon = await storage.updateDemon(demonId, validation.data);
+      let demonData: any = { ...validation.data };
+      
+      // If verifier name is provided, look up the user and set verifierId
+      if (validation.data.verifier && validation.data.verifier.trim()) {
+        const verifierUser = await storage.getUserByUsername(validation.data.verifier.trim());
+        if (verifierUser) {
+          demonData = { ...demonData, verifierId: verifierUser.id };
+        }
+      } else {
+        // If verifier is empty, clear the verifierId
+        demonData = { ...demonData, verifierId: null };
+      }
+
+      const demon = await storage.updateDemon(demonId, demonData);
       res.json(demon);
     } catch (error: any) {
       console.error("Error updating demon:", error);
