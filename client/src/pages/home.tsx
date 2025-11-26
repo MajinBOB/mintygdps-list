@@ -26,6 +26,11 @@ export default function Home() {
       label: "Upcoming List",
       description: "Upcoming demons to be rated"
     },
+    { 
+      value: "platformer", 
+      label: "Platformer List",
+      description: "Platformer-style demon levels"
+    },
   ];
 
   return (

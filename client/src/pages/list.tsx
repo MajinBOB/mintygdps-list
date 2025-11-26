@@ -69,7 +69,7 @@ export default function ListPage() {
                 </p>
               </div>
 
-              {listType !== "unrated" && (
+              {listType !== "upcoming" && (
                 <Button asChild data-testid="button-submit-new">
                   <Link href="/submit">
                     <PlusCircle className="h-4 w-4 mr-2" />
