@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { isUnauthorizedError } from "@/lib/authUtils";
@@ -22,10 +22,17 @@ export default function SubmitRecord() {
   const { isAuthenticated } = useAuth();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+  const [selectedListType, setSelectedListType] = useState<string>("demonlist");
 
-  const { data: demons } = useQuery<Demon[]>({
+  const { data: allDemons } = useQuery<Demon[]>({
     queryKey: ["/api/demons"],
   });
+
+  // Filter demons by selected list type
+  const demons = useMemo(() => {
+    if (!allDemons) return [];
+    return allDemons.filter((d) => d.listType === selectedListType).sort((a, b) => a.position - b.position);
+  }, [allDemons, selectedListType]);
 
   const form = useForm<z.infer<typeof insertRecordSchema>>({
     resolver: zodResolver(insertRecordSchema),
@@ -121,6 +128,26 @@ export default function SubmitRecord() {
               <CardContent>
                 <Form {...form}>
                   <form onSubmit={form.handleSubmit((data) => mutation.mutate(data))} className="space-y-6">
+                    <FormItem>
+                      <FormLabel>List Type</FormLabel>
+                      <Select value={selectedListType} onValueChange={(value) => {
+                        setSelectedListType(value);
+                        form.setValue("demonId", ""); // Reset demon selection when list type changes
+                      }}>
+                        <FormControl>
+                          <SelectTrigger data-testid="select-list-type">
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="demonlist">Demonlist</SelectItem>
+                          <SelectItem value="challenge">Challenge List</SelectItem>
+                          <SelectItem value="unrated">Unrated List</SelectItem>
+                          <SelectItem value="platformer">Platformer List</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+
                     <FormField
                       control={form.control}
                       name="demonId"
