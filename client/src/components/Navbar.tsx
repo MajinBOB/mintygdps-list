@@ -13,7 +13,7 @@ export function Navbar() {
         <Link href="/">
           <a className="flex items-center gap-2 hover:opacity-80 transition-opacity" data-testid="link-logo">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent" />
-            <span className="font-display font-bold text-xl">GD Demonlist</span>
+            <span className="font-display font-bold text-xl">MintyGDPS List</span>
           </a>
         </Link>
 
