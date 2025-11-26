@@ -67,6 +67,29 @@ export default function SubmitRecord() {
     },
   });
 
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-1 py-12 flex items-center justify-center">
+          <Card className="w-full max-w-md">
+            <CardContent className="pt-6">
+              <div className="text-center space-y-4">
+                <h2 className="font-display font-bold text-xl">Login Required</h2>
+                <p className="text-muted-foreground">
+                  You must be logged in to submit a record.
+                </p>
+                <Button className="w-full" asChild data-testid="button-login-redirect">
+                  <Link href="/login">Go to Login</Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />

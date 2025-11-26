@@ -18,6 +18,7 @@ import Leaderboard from "@/pages/leaderboard";
 import SubmitRecord from "@/pages/submit-record";
 import Login from "@/pages/login";
 import Signup from "@/pages/signup";
+import Logout from "@/pages/logout";
 import AdminDashboard from "@/pages/admin-dashboard";
 import AdminDemons from "@/pages/admin-demons";
 import AdminSubmissions from "@/pages/admin-submissions";
@@ -46,6 +47,7 @@ function Router() {
       <Route path="/submit/:id?" component={SubmitRecord} />
       <Route path="/login" component={Login} />
       <Route path="/signup" component={Signup} />
+      <Route path="/logout" component={Logout} />
       <Route path="/profile" component={Profile} />
       <Route path="/settings" component={Settings} />
       <Route path="/admin/dashboard" component={AdminDashboard} />
