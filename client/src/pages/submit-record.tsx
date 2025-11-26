@@ -23,16 +23,30 @@ export default function SubmitRecord() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [selectedListType, setSelectedListType] = useState<string>("demonlist");
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   const { data: allDemons } = useQuery<Demon[]>({
     queryKey: ["/api/demons"],
   });
 
-  // Filter demons by selected list type
+  // Filter demons by selected list type and search query
   const demons = useMemo(() => {
     if (!allDemons) return [];
-    return allDemons.filter((d) => d.listType === selectedListType).sort((a, b) => a.position - b.position);
-  }, [allDemons, selectedListType]);
+    let filtered = allDemons
+      .filter((d) => d.listType === selectedListType)
+      .sort((a, b) => a.position - b.position);
+
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter((d) =>
+        d.name.toLowerCase().includes(query) ||
+        d.position.toString().includes(query) ||
+        d.creator.toLowerCase().includes(query)
+      );
+    }
+
+    return filtered;
+  }, [allDemons, selectedListType, searchQuery]);
 
   const form = useForm<z.infer<typeof insertRecordSchema>>({
     resolver: zodResolver(insertRecordSchema),
@@ -132,6 +146,7 @@ export default function SubmitRecord() {
                       <FormLabel>List Type</FormLabel>
                       <Select value={selectedListType} onValueChange={(value) => {
                         setSelectedListType(value);
+                        setSearchQuery(""); // Reset search when list type changes
                         form.setValue("demonId", ""); // Reset demon selection when list type changes
                       }}>
                         <FormControl>
@@ -148,6 +163,18 @@ export default function SubmitRecord() {
                       </Select>
                     </FormItem>
 
+                    <FormItem>
+                      <FormLabel>Search Level</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Search by name, position, or creator..."
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          data-testid="input-search-demon"
+                        />
+                      </FormControl>
+                    </FormItem>
+
                     <FormField
                       control={form.control}
                       name="demonId"
@@ -161,11 +188,17 @@ export default function SubmitRecord() {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              {demons?.map((demon) => (
-                                <SelectItem key={demon.id} value={demon.id}>
-                                  #{demon.position} - {demon.name}
+                              {demons && demons.length > 0 ? (
+                                demons.map((demon) => (
+                                  <SelectItem key={demon.id} value={demon.id}>
+                                    #{demon.position} - {demon.name}
+                                  </SelectItem>
+                                ))
+                              ) : (
+                                <SelectItem value="no-results" disabled>
+                                  No levels found
                                 </SelectItem>
-                              ))}
+                              )}
                             </SelectContent>
                           </Select>
                           <FormMessage />
