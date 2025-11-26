@@ -53,9 +53,15 @@ export default function Packs() {
   });
 
   const completedLevelIds = useMemo(() => {
-    if (!playerDetails?.completedLevels) return new Set<string>();
-    return new Set(playerDetails.completedLevels.map((l: any) => l.id));
-  }, [playerDetails?.completedLevels]);
+    const ids = new Set<string>();
+    if (playerDetails?.completedLevels) {
+      playerDetails.completedLevels.forEach((l: any) => ids.add(l.id));
+    }
+    if (playerDetails?.verifiedLevels) {
+      playerDetails.verifiedLevels.forEach((l: any) => ids.add(l.id));
+    }
+    return ids;
+  }, [playerDetails?.completedLevels, playerDetails?.verifiedLevels]);
 
   const displayName = LIST_NAMES[listType] || listType;
 

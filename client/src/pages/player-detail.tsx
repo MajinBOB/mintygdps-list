@@ -21,6 +21,7 @@ type PlayerDetail = {
   verifiedLevels: Demon[];
   completionPoints: number;
   verifierPoints: number;
+  packBonusPoints: number;
   totalPoints: number;
 };
 
@@ -111,7 +112,7 @@ export default function PlayerDetail() {
                   )}
                 </div>
               </div>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <Card className="p-4 text-center">
                   <p className="text-3xl font-bold text-primary">
                     {player.totalPoints}
@@ -129,6 +130,12 @@ export default function PlayerDetail() {
                     {player.verifierPoints}
                   </p>
                   <p className="text-sm text-muted-foreground">Verifier Points</p>
+                </Card>
+                <Card className="p-4 text-center">
+                  <p className="text-3xl font-bold bg-gradient-to-r from-green-500 to-emerald-500 bg-clip-text text-transparent">
+                    +{player.packBonusPoints}
+                  </p>
+                  <p className="text-sm text-muted-foreground">Pack Points</p>
                 </Card>
               </div>
             </div>
