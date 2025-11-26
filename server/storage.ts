@@ -428,7 +428,13 @@ export class DatabaseStorage implements IStorage {
       const completions = Number(completionResult[0]?.completions) || 0;
       const verifierPoints = Number(verifierResult[0]?.verifierPoints) || 0;
       const verifiedCount = Number(verifierResult[0]?.verifiedCount) || 0;
-      const totalPoints = completionPoints + verifierPoints;
+
+      // Calculate pack completion bonus points
+      const userPacks = await this.getPacksByUser(user.id);
+      const completedPacks = userPacks.filter(p => p.isCompleted);
+      const packBonusPoints = completedPacks.reduce((sum, pack) => sum + pack.points, 0);
+
+      const totalPoints = completionPoints + verifierPoints + packBonusPoints;
       // Verified levels count as completions
       const totalCompletions = completions + verifiedCount;
 
@@ -442,6 +448,7 @@ export class DatabaseStorage implements IStorage {
         },
         completionPoints,
         verifierPoints,
+        packBonusPoints,
         points: totalPoints,
         completions: totalCompletions,
         verifiedCount,
@@ -491,7 +498,13 @@ export class DatabaseStorage implements IStorage {
     // Calculate points
     const completionPoints = completedRecords.reduce((sum, r) => sum + (r.demon?.points || 0), 0);
     const verifierPoints = verifiedDemons.reduce((sum, d) => sum + (d.points || 0), 0);
-    const totalPoints = completionPoints + verifierPoints;
+    
+    // Calculate pack completion bonus points
+    const userPacks = await this.getPacksByUser(userId);
+    const completedPacks = userPacks.filter(p => p.isCompleted);
+    const packBonusPoints = completedPacks.reduce((sum, pack) => sum + pack.points, 0);
+    
+    const totalPoints = completionPoints + verifierPoints + packBonusPoints;
 
     return {
       user: {
@@ -502,8 +515,10 @@ export class DatabaseStorage implements IStorage {
       },
       completedLevels: completedRecords.map(r => r.demon).filter(Boolean),
       verifiedLevels: verifiedDemons,
+      completedPacks: completedPacks.map(p => ({ id: p.id, name: p.name, points: p.points })),
       completionPoints,
       verifierPoints,
+      packBonusPoints,
       totalPoints,
     };
   }
