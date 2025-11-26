@@ -40,7 +40,7 @@ export function AppSidebar() {
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent" />
           <div>
-            <p className="font-display font-bold text-lg">GD Demonlist</p>
+            <p className="font-display font-bold text-lg">MintyGDPS List</p>
             <p className="text-xs text-muted-foreground">Admin Panel</p>
           </div>
         </div>
