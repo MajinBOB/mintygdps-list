@@ -78,6 +78,29 @@ export default function AdminSubmissions() {
     },
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: async (recordId: string) => {
+      await apiRequest("DELETE", `/api/admin/records/${recordId}`, {});
+    },
+    onSuccess: () => {
+      toast({ title: "Record Deleted", description: "The record has been removed." });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/records"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/leaderboard"] });
+    },
+    onError: (error: Error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => { window.location.href = "/login"; }, 500);
+        return;
+      }
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    },
+  });
+
   const pendingRecords = records?.filter(r => r.status === "pending") || [];
   const approvedRecords = records?.filter(r => r.status === "approved") || [];
   const rejectedRecords = records?.filter(r => r.status === "rejected") || [];
@@ -162,7 +185,11 @@ export default function AdminSubmissions() {
                     </div>
                   ) : (
                     approvedRecords.map(record => (
-                      <RecordCard key={record.id} record={record} />
+                      <RecordCard 
+                        key={record.id} 
+                        record={record}
+                        onDelete={(r) => deleteMutation.mutate(r.id)}
+                      />
                     ))
                   )}
                 </TabsContent>

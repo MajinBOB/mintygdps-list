@@ -247,6 +247,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete a record (admin only)
+  app.delete("/api/admin/records/:id", isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const recordId = req.params.id;
+      await storage.deleteRecord(recordId);
+      res.json({ message: "Record deleted" });
+    } catch (error: any) {
+      console.error("Error deleting record:", error);
+      res.status(500).json({ message: error.message || "Failed to delete record" });
+    }
+  });
+
   // Create a demon (admin only)
   app.post("/api/admin/demons", isAuthenticated, isAdmin, async (req, res) => {
     try {

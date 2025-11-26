@@ -330,6 +330,32 @@ export class DatabaseStorage implements IStorage {
       .where(eq(records.id, recordId));
   }
 
+  async deleteRecord(recordId: string): Promise<void> {
+    const record = await db
+      .select()
+      .from(records)
+      .where(eq(records.id, recordId));
+
+    if (!record || record.length === 0) {
+      throw new Error("Record not found");
+    }
+
+    // If record is approved, decrement completion count
+    if (record[0].status === "approved") {
+      await db
+        .update(demons)
+        .set({
+          completionCount: sql`${demons.completionCount} - 1`,
+        })
+        .where(eq(demons.id, record[0].demonId));
+    }
+
+    // Delete the record
+    await db
+      .delete(records)
+      .where(eq(records.id, recordId));
+  }
+
   // Leaderboard operations
   async getLeaderboard(listType?: string): Promise<any[]> {
     // Get all users with their completion points and verifier points

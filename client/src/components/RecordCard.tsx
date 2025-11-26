@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { StatusBadge } from "./StatusBadge";
-import { ExternalLink, CheckCircle, XCircle } from "lucide-react";
+import { ExternalLink, CheckCircle, XCircle, Trash2 } from "lucide-react";
 import { getInitials } from "@/lib/initials";
 import type { Record, User, Demon } from "@shared/schema";
 
@@ -10,10 +10,11 @@ type RecordCardProps = {
   record: Record & { user?: User; demon?: Demon };
   onApprove?: (record: Record) => void;
   onReject?: (record: Record) => void;
+  onDelete?: (record: Record) => void;
   showActions?: boolean;
 };
 
-export function RecordCard({ record, onApprove, onReject, showActions = false }: RecordCardProps) {
+export function RecordCard({ record, onApprove, onReject, onDelete, showActions = false }: RecordCardProps) {
   const userInitials = record.user ? getInitials(record.user) : '?';
 
   return (
@@ -77,6 +78,17 @@ export function RecordCard({ record, onApprove, onReject, showActions = false }:
                 Reject
               </Button>
             </div>
+          )}
+          
+          {record.status === 'approved' && onDelete && (
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={() => onDelete(record)}
+              data-testid={`button-delete-record-${record.id}`}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
           )}
         </div>
       </CardContent>
