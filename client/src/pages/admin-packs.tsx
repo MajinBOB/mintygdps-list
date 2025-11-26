@@ -61,7 +61,8 @@ export default function AdminPacks() {
         points: parseInt(newPackPoints),
         listType,
       };
-      const pack = await apiRequest("POST", "/api/admin/packs", packData);
+      const response = await apiRequest("POST", "/api/admin/packs", packData);
+      const pack = await response.json();
       const packId = (pack as any)?.id;
       
       if (!packId) {
