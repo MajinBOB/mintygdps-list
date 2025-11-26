@@ -90,7 +90,7 @@ export default function Home() {
             {/* List Cards */}
             <section>
               <h2 className="font-display font-bold text-3xl mb-8 text-center">
-                Browse Lists
+                MintyGDPS Lists
               </h2>
               
               <div className="grid md:grid-cols-2 gap-4">

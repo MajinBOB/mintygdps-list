@@ -1,9 +1,20 @@
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Trophy, Target, Users, ArrowRight } from "lucide-react";
 import heroImage from "@assets/generated_images/geometric_dash_hero_background.png";
 
+type Stats = {
+  totalDemons: number;
+  verifiedRecords: number;
+  activePlayers: number;
+};
+
 export default function Landing() {
+  const { data: stats } = useQuery<Stats>({
+    queryKey: ["/api/stats"],
+  });
+
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
@@ -60,15 +71,15 @@ export default function Landing() {
             {/* Live Stats */}
             <div className="flex flex-wrap items-center justify-center gap-8 pt-8 text-white/90">
               <div className="text-center">
-                <p className="text-3xl font-display font-bold text-white">500+</p>
+                <p className="text-3xl font-display font-bold text-white">{stats?.totalDemons || 0}</p>
                 <p className="text-sm uppercase tracking-wide">Total Demons</p>
               </div>
               <div className="text-center">
-                <p className="text-3xl font-display font-bold text-white">10K+</p>
+                <p className="text-3xl font-display font-bold text-white">{stats?.verifiedRecords || 0}</p>
                 <p className="text-sm uppercase tracking-wide">Verified Records</p>
               </div>
               <div className="text-center">
-                <p className="text-3xl font-display font-bold text-white">2.5K+</p>
+                <p className="text-3xl font-display font-bold text-white">{stats?.activePlayers || 0}</p>
                 <p className="text-sm uppercase tracking-wide">Active Players</p>
               </div>
             </div>
