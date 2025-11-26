@@ -46,6 +46,9 @@ export interface IStorage {
   
   // Stats operations
   getStats(): Promise<any>;
+
+  // Moderators operations
+  getModerators(): Promise<User[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -469,6 +472,13 @@ export class DatabaseStorage implements IStorage {
       verifiedRecords,
       activePlayers: activePlayers[0]?.count || 0,
     };
+  }
+
+  async getModerators(): Promise<User[]> {
+    return await db
+      .select()
+      .from(users)
+      .where(eq(users.isModerator, true));
   }
 }
 

@@ -11,9 +11,18 @@ type Stats = {
   activePlayers: number;
 };
 
+type Moderator = {
+  id: string;
+  username: string;
+  isModerator: boolean;
+};
+
 export default function Home() {
   const { data: stats } = useQuery<Stats>({
     queryKey: ["/api/stats"],
+  });
+  const { data: moderators } = useQuery<Moderator[]>({
+    queryKey: ["/api/moderators"],
   });
   const lists = [
     { 
@@ -118,6 +127,31 @@ export default function Home() {
                 ))}
               </div>
             </section>
+
+            {/* List Moderators */}
+            {moderators && moderators.length > 0 && (
+              <section>
+                <h2 className="font-display font-bold text-3xl mb-8 text-center">
+                  List Moderators
+                </h2>
+                
+                <Card className="p-8">
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {moderators.map((moderator) => (
+                      <div
+                        key={moderator.id}
+                        className="flex items-center justify-center p-4 rounded-lg bg-primary/5 border border-primary/20 hover-elevate"
+                        data-testid={`moderator-card-${moderator.id}`}
+                      >
+                        <p className="font-semibold text-center text-sm" data-testid={`text-moderator-${moderator.id}`}>
+                          {moderator.username}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+              </section>
+            )}
 
             {/* Quick Actions */}
             <section>
