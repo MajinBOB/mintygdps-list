@@ -384,10 +384,10 @@ export class DatabaseStorage implements IStorage {
             .where(eq(demons.verifierId, user.id))
       );
 
-      const completionPoints = completionResult[0]?.points || 0;
-      const completions = completionResult[0]?.completions || 0;
-      const verifierPoints = verifierResult[0]?.verifierPoints || 0;
-      const verifiedCount = verifierResult[0]?.verifiedCount || 0;
+      const completionPoints = Number(completionResult[0]?.points) || 0;
+      const completions = Number(completionResult[0]?.completions) || 0;
+      const verifierPoints = Number(verifierResult[0]?.verifierPoints) || 0;
+      const verifiedCount = Number(verifierResult[0]?.verifiedCount) || 0;
       const totalPoints = completionPoints + verifierPoints;
       // Verified levels count as completions
       const totalCompletions = completions + verifiedCount;
