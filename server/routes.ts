@@ -99,6 +99,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get player details
+  app.get("/api/players/:userId", async (req, res) => {
+    try {
+      const userId = req.params.userId;
+      const playerDetails = await storage.getPlayerDetails(userId);
+      if (!playerDetails) {
+        return res.status(404).json({ message: "Player not found" });
+      }
+      res.json(playerDetails);
+    } catch (error) {
+      console.error("Error fetching player details:", error);
+      res.status(500).json({ message: "Failed to fetch player details" });
+    }
+  });
+
   // Get leaderboard
   app.get("/api/leaderboard", async (req, res) => {
     try {

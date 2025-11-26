@@ -39,6 +39,9 @@ export interface IStorage {
 
   // Leaderboard operations
   getLeaderboard(): Promise<any[]>;
+  
+  // Player detail operations
+  getPlayerDetails(userId: string): Promise<any>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -327,6 +330,55 @@ export class DatabaseStorage implements IStorage {
       ...entry,
       rank: index + 1,
     }));
+  }
+
+  async getPlayerDetails(userId: string): Promise<any> {
+    // Get user
+    const user = await this.getUser(userId);
+    if (!user) return null;
+
+    // Get completed levels (approved records)
+    const completedRecords = await db
+      .select({
+        demon: {
+          id: demons.id,
+          name: demons.name,
+          creator: demons.creator,
+          verifier: demons.verifier,
+          difficulty: demons.difficulty,
+          position: demons.position,
+          points: demons.points,
+          videoUrl: demons.videoUrl,
+          listType: demons.listType,
+        }
+      })
+      .from(records)
+      .leftJoin(demons, eq(records.demonId, demons.id))
+      .where(and(eq(records.userId, userId), eq(records.status, "approved")));
+
+    // Get verified levels
+    const verifiedDemons = await db
+      .select()
+      .from(demons)
+      .where(eq(demons.verifierId, userId));
+
+    // Calculate points
+    const completionPoints = completedRecords.reduce((sum, r) => sum + (r.demon?.points || 0), 0);
+    const verifierPoints = verifiedDemons.reduce((sum, d) => sum + (d.points || 0), 0);
+    const totalPoints = completionPoints + verifierPoints;
+
+    return {
+      user: {
+        id: user.id,
+        username: user.username,
+        profileImageUrl: user.profileImageUrl,
+      },
+      completedLevels: completedRecords.map(r => r.demon).filter(Boolean),
+      verifiedLevels: verifiedDemons,
+      completionPoints,
+      verifierPoints,
+      totalPoints,
+    };
   }
 }
 
