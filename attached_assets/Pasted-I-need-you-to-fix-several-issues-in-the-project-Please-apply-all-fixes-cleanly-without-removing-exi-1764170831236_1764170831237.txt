@@ -1,0 +1,69 @@
+I need you to fix several issues in the project. Please apply all fixes cleanly without removing existing functionality.
+
+---
+
+### 1. Profile page initials crash
+The profile page crashes with:
+((user.firstName || "")[0] + (user.lastName || "")[0]).toUpperCase is not a function
+
+Fix this by:
+- Removing firstName and lastName entirely from the user model.
+- Use ONLY `username` everywhere.
+- Replace initials logic with: const initials = (user.username?.[0] || "U").toUpperCase()
+
+Also remove first/last name fields from:
+- The user schema
+- The signup/login UI
+- Any backend references
+
+---
+
+### 2. Clicking a level card OR logging out → 404 Page Not Found
+Fix routing issues:
+- Level cards should correctly link to `/level/:id`
+- Create or fix the LevelPage route in App.tsx
+- Make sure the logout redirect goes back to `/` without triggering a 404
+- Ensure all list pages correctly wrap level cards in <Link> components pointing to the proper route
+
+---
+
+### 3. Lock submit-record button when logged out
+If the user is NOT logged in:
+- The Submit Record button should be disabled
+- Clicking it should show a message like: “You must log in to submit a record.”
+- If logged in, the button works normally.
+
+---
+
+### 4. Fix 403 Forbidden when dragging levels
+Dragging a demon in Manage Demons causes a 403 error.  
+Fix this by:
+- Ensuring moderators have permission on the reorder endpoint
+- Checking that the correct auth middleware is applied
+- Making sure the drag-and-drop request includes the user session/token
+- Making sure backend role checks match the moderator role in the database
+
+---
+
+### 5. Dashboard stats in the admin panel don’t load
+Fix the dashboard API:
+- Confirm the admin stats endpoint returns valid JSON
+- Ensure the frontend fetch uses the correct route
+- Make sure “listType” is passed if needed
+- Ensure auth is applied correctly so the request isn’t blocked
+
+---
+
+### 6. Level card click still shows 404 page
+Even after previous changes, clicking a level card still leads to:
+"404 Page Not Found – Did you forget to add the page to the router?"
+
+Fix by:
+- Making sure `/level/:id` is added as a Route in App.tsx
+- Ensuring the LevelPage component is imported and rendered
+- Ensuring the link for each level card uses `/level/${level.id}`
+
+---
+
+Please implement all fixes cleanly across the frontend and backend.  
+Do NOT remove any other features.

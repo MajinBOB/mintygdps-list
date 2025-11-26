@@ -96,7 +96,7 @@ export function DemonCard({ demon, onEdit, onDelete, showActions = false }: Demo
   }
 
   return (
-    <Link href={`/level-detail?id=${demon.id}`}>
+    <Link href={`/level-detail/${demon.id}`}>
       <a data-testid={`link-demon-${demon.id}`}>
         <Card className="hover-elevate cursor-pointer" data-testid={`card-demon-${demon.id}`}>
           {cardContent}
