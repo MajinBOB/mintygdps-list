@@ -161,6 +161,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get all packs (public, with optional list type filter)
+  app.get("/api/packs", async (req, res) => {
+    try {
+      const listType = req.query.listType as string | undefined;
+      const allPacks = await storage.getAllPacks(listType);
+      res.json(allPacks);
+    } catch (error) {
+      console.error("Error fetching packs:", error);
+      res.status(500).json({ message: "Failed to fetch packs" });
+    }
+  });
+
   // ============================================================================
   // PROTECTED ROUTES (Auth required)
   // ============================================================================
