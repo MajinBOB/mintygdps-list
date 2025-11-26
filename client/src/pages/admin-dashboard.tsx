@@ -39,7 +39,7 @@ export default function AdminDashboard() {
     queryKey: ["/api/admin/users"],
   });
 
-  const isLoading = demonsLoading || recordsLoading || usersLoading;
+  const isDataLoading = demonsLoading || recordsLoading || usersLoading;
 
   const pendingRecords = records?.filter((r: any) => r.status === "pending").length || 0;
   const totalDemons = demons?.length || 0;
@@ -78,7 +78,7 @@ export default function AdminDashboard() {
                 </p>
               </div>
 
-              {isLoading ? (
+              {isDataLoading ? (
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                   {[...Array(4)].map((_, i) => (
                     <Skeleton key={i} className="h-32" />
