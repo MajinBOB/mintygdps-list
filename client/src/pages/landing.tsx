@@ -22,7 +22,7 @@ export default function Landing() {
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent" />
-            <span className="font-display font-bold text-xl">GD Demonlist</span>
+            <span className="font-display font-bold text-xl">MintyGDPS List</span>
           </div>
           <div className="flex items-center gap-4">
             <ThemeToggle />
@@ -44,7 +44,7 @@ export default function Landing() {
         <div className="relative container mx-auto px-6 py-24 md:py-32">
           <div className="max-w-3xl mx-auto text-center space-y-8">
             <h1 className="font-display font-bold text-5xl md:text-7xl text-white leading-tight">
-              The Ultimate Geometry Dash Demonlist
+              MintyGDPS List
             </h1>
             <p className="text-xl md:text-2xl text-white/90 leading-relaxed">
               Explore the hardest demons, track verified records, and compete with the best players worldwide
