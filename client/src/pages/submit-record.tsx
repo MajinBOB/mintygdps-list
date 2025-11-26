@@ -44,7 +44,7 @@ export default function SubmitRecord() {
         title: "Record Submitted!",
         description: "Your submission is pending review by our admin team.",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/records"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/records"] });
       setLocation("/list?type=demonlist");
     },
     onError: (error: Error) => {
