@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Link } from "wouter";
+import { getInitials } from "@/lib/initials";
 
 export function ProfileDropdown() {
   const { user, isModerator } = useAuth();
@@ -18,9 +19,7 @@ export function ProfileDropdown() {
 
   if (!user) return null;
 
-  const firstName = user.firstName || "";
-  const lastName = user.lastName || "";
-  const initials = ((firstName[0] || "") + (lastName[0] || "")).toUpperCase() || "U";
+  const initials = getInitials(user);
 
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>

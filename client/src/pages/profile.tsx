@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getInitials } from "@/lib/initials";
 import type { Record } from "@shared/schema";
 
 export default function Profile() {
@@ -38,7 +39,7 @@ export default function Profile() {
     );
   }
 
-  const initials = ((user.firstName || "")[0] + (user.lastName || "")[0]).toUpperCase() || "U";
+  const initials = getInitials(user);
   const approvedRecords = records?.filter(r => r.status === "approved") || [];
 
   return (
@@ -58,11 +59,13 @@ export default function Profile() {
                 
                 <div className="flex-1 text-center md:text-left">
                   <h1 className="font-display font-bold text-3xl mb-2" data-testid="text-profile-name">
-                    {user.firstName} {user.lastName}
+                    {user.username}
                   </h1>
-                  <p className="text-muted-foreground mb-4" data-testid="text-profile-email">
-                    {user.email}
-                  </p>
+                  {user.firstName && user.lastName && (
+                    <p className="text-muted-foreground mb-4" data-testid="text-profile-email">
+                      {user.firstName} {user.lastName}
+                    </p>
+                  )}
                   
                   <div className="grid grid-cols-3 gap-4">
                     <div className="text-center">

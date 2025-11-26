@@ -1,5 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Trophy } from "lucide-react";
+import { getInitials } from "@/lib/initials";
 import type { User } from "@shared/schema";
 
 type LeaderboardEntry = {
@@ -18,7 +19,7 @@ export function LeaderboardTable({ entries }: LeaderboardTableProps) {
     <div className="space-y-2">
       {entries.map((entry, index) => {
         const isTopThree = index < 3;
-        const userInitials = `${entry.user.firstName?.[0] || ''}${entry.user.lastName?.[0] || ''}`;
+        const userInitials = getInitials(entry.user);
         
         return (
           <div
@@ -49,7 +50,7 @@ export function LeaderboardTable({ entries }: LeaderboardTableProps) {
             
             <div className="flex-1 min-w-0">
               <p className="font-semibold truncate" data-testid={`text-player-name-${index}`}>
-                {entry.user.firstName || entry.user.email}
+                {entry.user.username}
               </p>
               <p className="text-sm text-muted-foreground">
                 {entry.completions} completions

@@ -88,7 +88,7 @@ export default function Settings() {
                 <div>
                   <label className="text-sm font-medium">Name</label>
                   <p className="text-muted-foreground mt-1" data-testid="text-settings-name">
-                    {user.firstName} {user.lastName}
+                    {user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : 'Not set'}
                   </p>
                 </div>
 
@@ -124,7 +124,7 @@ export default function Settings() {
                 <div className="pt-4 border-t">
                   <p className="text-sm font-medium mb-4">Danger Zone</p>
                   <Button variant="destructive" asChild data-testid="button-logout">
-                    <a href="/api/logout" className="flex items-center gap-2">
+                    <a href="/logout" className="flex items-center gap-2">
                       <LogOut className="h-4 w-4" />
                       Log Out
                     </a>

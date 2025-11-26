@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { StatusBadge } from "./StatusBadge";
 import { ExternalLink, CheckCircle, XCircle } from "lucide-react";
+import { getInitials } from "@/lib/initials";
 import type { Record, User, Demon } from "@shared/schema";
 
 type RecordCardProps = {
@@ -13,9 +14,7 @@ type RecordCardProps = {
 };
 
 export function RecordCard({ record, onApprove, onReject, showActions = false }: RecordCardProps) {
-  const userInitials = record.user
-    ? `${record.user.firstName?.[0] || ''}${record.user.lastName?.[0] || ''}`
-    : '?';
+  const userInitials = record.user ? getInitials(record.user) : '?';
 
   return (
     <Card className="hover-elevate" data-testid={`card-record-${record.id}`}>
@@ -30,7 +29,7 @@ export function RecordCard({ record, onApprove, onReject, showActions = false }:
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="font-semibold truncate" data-testid={`text-record-user-${record.id}`}>
-                  {record.user?.firstName || record.user?.email || 'Unknown User'}
+                  {record.user?.username || 'Unknown User'}
                 </span>
                 <StatusBadge status={record.status} />
               </div>
