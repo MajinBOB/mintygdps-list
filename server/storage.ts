@@ -122,6 +122,29 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createDemon(demonData: InsertDemon): Promise<Demon> {
+    // Check if a demon with this position already exists in the same list type
+    const existingAtPosition = await db
+      .select()
+      .from(demons)
+      .where(and(
+        eq(demons.position, demonData.position),
+        eq(demons.listType, demonData.listType)
+      ));
+
+    // If a demon exists at this position, shift all demons at this position and below down by 1
+    if (existingAtPosition.length > 0) {
+      await db
+        .update(demons)
+        .set({
+          position: sql`${demons.position} + 1`,
+          updatedAt: new Date(),
+        })
+        .where(and(
+          sql`${demons.position} >= ${demonData.position}`,
+          eq(demons.listType, demonData.listType)
+        ));
+    }
+
     const [demon] = await db.insert(demons).values(demonData).returning();
     return demon;
   }
