@@ -53,7 +53,7 @@ export default function Settings() {
     resolver: zodResolver(settingsSchema),
     defaultValues: {
       profileImageUrl: user?.profileImageUrl || "",
-      country: user?.country || "",
+      country: user?.country || "none",
     },
   });
 
@@ -80,7 +80,11 @@ export default function Settings() {
   const onSettingsSubmit = async (data: SettingsFormData) => {
     setIsUpdatingSettings(true);
     try {
-      await apiRequest("PATCH", "/api/auth/settings", data);
+      const submitData = {
+        profileImageUrl: data.profileImageUrl,
+        country: data.country === "none" ? null : data.country,
+      };
+      await apiRequest("PATCH", "/api/auth/settings", submitData);
       toast({
         title: "Success",
         description: "Profile settings updated successfully!",
@@ -234,7 +238,7 @@ export default function Settings() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="">None</SelectItem>
+                            <SelectItem value="none">None</SelectItem>
                             {COUNTRIES.map((country) => (
                               <SelectItem key={country.code} value={country.code} data-testid={`option-country-${country.code}`}>
                                 <span>{getCountryFlag(country.code)}</span>
