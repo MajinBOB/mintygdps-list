@@ -23,6 +23,7 @@ import Signup from "@/pages/signup";
 import Logout from "@/pages/logout";
 import AdminDashboard from "@/pages/admin-dashboard";
 import AdminDemons from "@/pages/admin-demons";
+import AdminPacks from "@/pages/admin-packs";
 import AdminSubmissions from "@/pages/admin-submissions";
 
 function Router() {
@@ -56,6 +57,7 @@ function Router() {
       <Route path="/settings" component={Settings} />
       <Route path="/admin/dashboard" component={AdminDashboard} />
       <Route path="/admin/demons" component={AdminDemons} />
+      <Route path="/admin/packs" component={AdminPacks} />
       <Route path="/admin/submissions" component={AdminSubmissions} />
       <Route component={NotFound} />
     </Switch>

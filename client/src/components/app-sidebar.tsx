@@ -1,5 +1,5 @@
 // Admin Sidebar - from javascript_log_in_with_replit blueprint
-import { LayoutDashboard, Trophy, FileCheck, LogOut, Home } from "lucide-react";
+import { LayoutDashboard, Trophy, FileCheck, LogOut, Home, Package } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -23,6 +23,11 @@ const menuItems = [
     title: "Manage Demons",
     url: "/admin/demons",
     icon: Trophy,
+  },
+  {
+    title: "Manage Packs",
+    url: "/admin/packs",
+    icon: Package,
   },
   {
     title: "Verify Submissions",

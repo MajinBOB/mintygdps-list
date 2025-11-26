@@ -348,6 +348,102 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ============================================================================
+  // PACK ROUTES (Admin only)
+  // ============================================================================
+
+  // Get all packs (with optional listType filter)
+  app.get("/api/admin/packs", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const listType = req.query.listType as string | undefined;
+      const allPacks = await storage.getAllPacks(listType);
+      res.json(allPacks);
+    } catch (error: any) {
+      console.error("Error fetching packs:", error);
+      res.status(500).json({ message: "Failed to fetch packs" });
+    }
+  });
+
+  // Create a pack
+  app.post("/api/admin/packs", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { insertPackSchema } = await import("@shared/schema");
+      const validation = insertPackSchema.safeParse(req.body);
+      
+      if (!validation.success) {
+        const { fromError } = await import("zod-validation-error");
+        const validationError = fromError(validation.error);
+        return res.status(400).json({ message: validationError.toString() });
+      }
+
+      const pack = await storage.createPack(validation.data);
+      res.json(pack);
+    } catch (error: any) {
+      console.error("Error creating pack:", error);
+      res.status(500).json({ message: error.message || "Failed to create pack" });
+    }
+  });
+
+  // Update a pack
+  app.put("/api/admin/packs/:id", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const packId = req.params.id;
+      const { name, points } = req.body;
+
+      if (!name || typeof points !== "number") {
+        return res.status(400).json({ message: "Invalid request data" });
+      }
+
+      const pack = await storage.updatePack(packId, { name, points });
+      res.json(pack);
+    } catch (error: any) {
+      console.error("Error updating pack:", error);
+      res.status(500).json({ message: error.message || "Failed to update pack" });
+    }
+  });
+
+  // Delete a pack
+  app.delete("/api/admin/packs/:id", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const packId = req.params.id;
+      await storage.deletePack(packId);
+      res.json({ message: "Pack deleted" });
+    } catch (error: any) {
+      console.error("Error deleting pack:", error);
+      res.status(500).json({ message: error.message || "Failed to delete pack" });
+    }
+  });
+
+  // Add level to pack
+  app.post("/api/admin/packs/:id/levels", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const packId = req.params.id;
+      const { demonId } = req.body;
+
+      if (!demonId) {
+        return res.status(400).json({ message: "demonId is required" });
+      }
+
+      await storage.addLevelToPack(packId, demonId);
+      res.json({ message: "Level added to pack" });
+    } catch (error: any) {
+      console.error("Error adding level to pack:", error);
+      res.status(500).json({ message: error.message || "Failed to add level" });
+    }
+  });
+
+  // Remove level from pack
+  app.delete("/api/admin/packs/:id/levels/:demonId", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id, demonId } = req.params;
+      await storage.removeLevelFromPack(id, demonId);
+      res.json({ message: "Level removed from pack" });
+    } catch (error: any) {
+      console.error("Error removing level from pack:", error);
+      res.status(500).json({ message: error.message || "Failed to remove level" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;

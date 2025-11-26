@@ -556,6 +556,105 @@ export class DatabaseStorage implements IStorage {
       .from(users)
       .where(eq(users.isModerator, true));
   }
+
+  async getAllPacks(listType?: string): Promise<any[]> {
+    let query = db.select().from(packs);
+    if (listType) {
+      query = query.where(eq(packs.listType, listType));
+    }
+    const allPacks = await query;
+    
+    return await Promise.all(
+      allPacks.map(async (pack) => {
+        const levels = await db
+          .select()
+          .from(packLevels)
+          .leftJoin(demons, eq(packLevels.demonId, demons.id))
+          .where(eq(packLevels.packId, pack.id));
+        
+        return {
+          ...pack,
+          levels: levels.map(l => l.demons).filter(Boolean),
+        };
+      })
+    );
+  }
+
+  async getPack(id: string): Promise<any> {
+    const [pack] = await db.select().from(packs).where(eq(packs.id, id));
+    if (!pack) return null;
+
+    const levels = await db
+      .select()
+      .from(packLevels)
+      .leftJoin(demons, eq(packLevels.demonId, demons.id))
+      .where(eq(packLevels.packId, id));
+
+    return {
+      ...pack,
+      levels: levels.map(l => l.demons).filter(Boolean),
+    };
+  }
+
+  async createPack(packData: InsertPack): Promise<Pack> {
+    const [pack] = await db.insert(packs).values(packData).returning();
+    return pack;
+  }
+
+  async updatePack(id: string, packData: Partial<InsertPack>): Promise<Pack> {
+    const [pack] = await db
+      .update(packs)
+      .set({ ...packData, updatedAt: new Date() })
+      .where(eq(packs.id, id))
+      .returning();
+    return pack;
+  }
+
+  async deletePack(id: string): Promise<void> {
+    await db.delete(packs).where(eq(packs.id, id));
+  }
+
+  async addLevelToPack(packId: string, demonId: string): Promise<void> {
+    await db.insert(packLevels).values({ packId, demonId }).onConflictDoNothing();
+  }
+
+  async removeLevelFromPack(packId: string, demonId: string): Promise<void> {
+    await db
+      .delete(packLevels)
+      .where(and(eq(packLevels.packId, packId), eq(packLevels.demonId, demonId)));
+  }
+
+  async getPacksByUser(userId: string): Promise<any[]> {
+    const allPacks = await db.select().from(packs);
+    
+    return await Promise.all(
+      allPacks.map(async (pack) => {
+        const levels = await db
+          .select({ demonId: packLevels.demonId })
+          .from(packLevels)
+          .where(eq(packLevels.packId, pack.id));
+
+        const demonIds = levels.map(l => l.demonId);
+        
+        if (demonIds.length === 0) {
+          return { ...pack, isCompleted: false, levels: [] };
+        }
+
+        const userRecords = await db
+          .select({ demonId: records.demonId })
+          .from(records)
+          .where(and(
+            eq(records.userId, userId),
+            eq(records.status, "approved")
+          ));
+
+        const userCompletedDemonIds = new Set(userRecords.map(r => r.demonId));
+        const isCompleted = demonIds.every(id => userCompletedDemonIds.has(id));
+
+        return { ...pack, isCompleted, levels: demonIds };
+      })
+    );
+  }
 }
 
 export const storage = new DatabaseStorage();
