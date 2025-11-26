@@ -176,6 +176,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: validationError.toString() });
       }
 
+      // Get demon details to check if submission is allowed
+      const demon = await storage.getDemon(validation.data.demonId);
+      if (!demon) {
+        return res.status(404).json({ message: "Demon not found" });
+      }
+
+      // Challenge list only accepts submissions for positions 1-100
+      if (demon.listType === "challenge" && demon.position > 100) {
+        return res.status(400).json({ message: "Submissions are not accepted for Challenge List positions beyond 100" });
+      }
+
       const record = await storage.createRecord(userId, validation.data);
       res.json(record);
     } catch (error: any) {
