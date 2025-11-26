@@ -27,22 +27,25 @@ export default function AdminDashboard() {
     }
   }, [isAuthenticated, isLoading, isAdmin, toast]);
 
-  const { data: demons } = useQuery<Demon[]>({
+  const { data: demons, isLoading: demonsLoading } = useQuery<Demon[]>({
     queryKey: ["/api/demons"],
   });
 
-  const { data: records } = useQuery<Record[]>({
+  const { data: records, isLoading: recordsLoading } = useQuery<any[]>({
     queryKey: ["/api/admin/records"],
   });
 
-  const { data: users } = useQuery<any[]>({
+  const { data: users, isLoading: usersLoading } = useQuery<any[]>({
     queryKey: ["/api/admin/users"],
   });
 
-  const pendingRecords = records?.filter(r => r.status === "pending").length || 0;
+  const isLoading = demonsLoading || recordsLoading || usersLoading;
+
+  const pendingRecords = records?.filter((r: any) => r.status === "pending").length || 0;
   const totalDemons = demons?.length || 0;
   const totalUsers = users?.length || 0;
-  const approvedThisWeek = records?.filter(r => {
+  const approvedRecords = records?.filter((r: any) => r.status === "approved").length || 0;
+  const approvedThisWeek = records?.filter((r: any) => {
     if (r.status !== "approved" || !r.reviewedAt) return false;
     const weekAgo = new Date();
     weekAgo.setDate(weekAgo.getDate() - 7);
@@ -75,7 +78,7 @@ export default function AdminDashboard() {
                 </p>
               </div>
 
-              {!demons || !records || !users ? (
+              {isLoading ? (
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                   {[...Array(4)].map((_, i) => (
                     <Skeleton key={i} className="h-32" />

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useLocation } from "wouter";
+import { useLocation, useParams } from "wouter";
 import { Navbar } from "@/components/Navbar";
 import { DifficultyBadge } from "@/components/DifficultyBadge";
 import { Button } from "@/components/ui/button";
@@ -11,11 +11,10 @@ import type { Demon, Record } from "@shared/schema";
 
 export default function LevelDetail() {
   const [, setLocation] = useLocation();
+  const params = useParams();
   
-  // Get demonId from query params
-  const demonId = typeof window !== "undefined" 
-    ? new URLSearchParams(window.location.search).get("id") 
-    : null;
+  // Get demonId from route params
+  const demonId = params.id || null;
 
   const { data: demon, isLoading: demonLoading } = useQuery<Demon>({
     queryKey: ["/api/demons", demonId],
