@@ -165,18 +165,19 @@ export class DatabaseStorage implements IStorage {
   async reorderDemons(demonOrder: Array<{ id: string; position: number }>, listType: string): Promise<void> {
     // Calculate points based on position
     // Standard lists: rank #1 = 300 pts, rank #200 = 1 pt, 201+ = 0 pts
-    // Challenge list: rank #1 = 300 pts, rank #200 = 100 pts, 201+ = 0 pts
+    // Challenge list: rank #1 = 100 pts, rank #200 = 1 pt, 201+ = 0 pts
     const calculatePoints = (position: number): number => {
       if (position < 1 || position > 200) return 0;
-      if (position === 1) return 300;
       
-      // Challenge list has 100 points at rank 200, other lists have 1 point
+      // Challenge list has max 100 points, other lists have 300 points
       if (listType === "challenge") {
-        if (position === 200) return 100;
-        // Linear interpolation: points = 300 - ((position - 1) * 200 / 199)
-        const points = 300 - ((position - 1) * 200 / 199);
+        if (position === 1) return 100;
+        if (position === 200) return 1;
+        // Linear interpolation: points = 100 - ((position - 1) * 99 / 199)
+        const points = 100 - ((position - 1) * 99 / 199);
         return Math.round(points);
       } else {
+        if (position === 1) return 300;
         if (position === 200) return 1;
         // Linear interpolation: points = 300 - ((position - 1) * 299 / 199)
         const points = 300 - ((position - 1) * 299 / 199);
