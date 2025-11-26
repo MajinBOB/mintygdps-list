@@ -73,10 +73,15 @@ export async function setupCustomAuth(app: Express) {
       // Hash password
       const passwordHash = await bcrypt.hash(password, 10);
 
-      // Create user
+      // Check if this is the first user
+      const allUsers = await storage.getAllUsers();
+      const isFirstUser = allUsers.length === 0;
+
+      // Create user - first user is admin
       const user = await storage.upsertUser({
         username,
         passwordHash,
+        isAdmin: isFirstUser,
       });
 
       // Set session with user data
