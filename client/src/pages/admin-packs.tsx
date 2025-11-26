@@ -61,11 +61,11 @@ export default function AdminPacks() {
         points: parseInt(newPackPoints),
         listType,
       };
-      const response = await apiRequest("POST", "/api/admin/packs", packData);
+      const response = (await apiRequest("POST", "/api/admin/packs", packData)) as { id: string };
       
       // Add selected levels to the pack
       if (selectedLevelIds.size > 0) {
-        for (const demonId of selectedLevelIds) {
+        for (const demonId of Array.from(selectedLevelIds)) {
           await apiRequest("POST", `/api/admin/packs/${response.id}/levels`, { demonId });
         }
       }
@@ -295,7 +295,7 @@ export default function AdminPacks() {
                           <label className="text-sm font-medium">Levels in Pack:</label>
                           <div className="space-y-2">
                             {pack.levels && pack.levels.length > 0 ? (
-                              pack.levels.map((level) => (
+                              pack.levels.map((level: any) => (
                                 <div
                                   key={level.id}
                                   className="flex items-center justify-between p-2 bg-secondary rounded"
